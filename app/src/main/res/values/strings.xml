@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Dicoding\nMentoring</string>
+    <string name="sign_up_title_button">Sign Up</string>
+    <string name="sign_in_title_button">Sign In</string>
+    <string name="invalid_email_message">Please enter a valid email address</string>
+    <string name="invalid_password_message">Password should be 8 characters long and without any spaces</string>
+    <string name="google_button_titile">Sign In With Google</string>
+    <string name="signin_title_action">"Already have an account? "</string>
+    <string name="signup_title_action">"Don't have an account? "</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="sign_in">Sign In</string>
+    <string name="show_your_password">show your password</string>
+    <string name="hide_your_password">hide your password</string>
+    <string name="email_hint">Enter your email address</string>
+    <string name="password_hint">Enter your password</string>
+    <string name="reset_password_title">Reset Password</string>
+    <string name="reset_success_message">Great news! Your password has been successfully reset</string>
+    <string name="reset_password_message_display">No worries, we’ll send you reset instructions</string>
+    <string name="reset_password_display">Forgot Password?</string>
+</resources>
