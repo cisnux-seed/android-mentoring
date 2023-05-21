@@ -204,7 +204,6 @@ fun LoginBody(
         Text(
             text = "Forgot Password?",
             modifier = Modifier
-                .padding(horizontal = 16.dp)
                 .clickable(onClick = navigateToResetPassword)
                 .fillMaxWidth(),
             textAlign = TextAlign.End,
