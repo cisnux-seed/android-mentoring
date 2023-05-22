@@ -32,7 +32,7 @@ class LoginViewModel @Inject constructor(
     val isValidEmail: State<Boolean> = derivedStateOf {
         if (_email.value.isNotEmpty())
             _email.value.isEmail()
-        else true
+        else false
     }
 
     private val _password = mutableStateOf("")
@@ -40,7 +40,7 @@ class LoginViewModel @Inject constructor(
     val isValidPassword: State<Boolean> = derivedStateOf {
         if (_password.value.isNotEmpty())
             _password.value.isPasswordSecure()
-        else true
+        else false
     }
 
     private val _isLoading = mutableStateOf(false)

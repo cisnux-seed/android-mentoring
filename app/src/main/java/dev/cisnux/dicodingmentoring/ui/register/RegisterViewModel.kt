@@ -26,19 +26,9 @@ class RegisterViewModel @Inject constructor(
 
     private val _email = mutableStateOf("")
     val email: State<String> get() = _email
-    val isValidEmail: State<Boolean> = derivedStateOf {
-        if (_email.value.isNotEmpty())
-            _email.value.isEmail()
-        else true
-    }
 
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
-    val isValidPassword: State<Boolean> = derivedStateOf {
-        if (_password.value.isNotEmpty())
-            _password.value.isPasswordSecure()
-        else true
-    }
 
     private val _isPasswordVisible = mutableStateOf(false)
     val isPasswordVisible: State<Boolean> get() = _isPasswordVisible

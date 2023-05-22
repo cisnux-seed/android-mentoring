@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -22,7 +21,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,20 +48,6 @@ fun AuthFormPreview() {
     var password by remember {
         mutableStateOf("")
     }
-    val isValidEmail by remember {
-        derivedStateOf {
-            if (email.isNotEmpty())
-                email.isEmail()
-            else true
-        }
-    }
-    val isValidPassword by remember {
-        derivedStateOf {
-            if (password.isNotEmpty())
-                password.isPasswordSecure()
-            else true
-        }
-    }
 
     DicodingMentoringTheme {
         Surface(
@@ -75,8 +59,6 @@ fun AuthFormPreview() {
                 password = password,
                 onEmailQueryChanged = { email = it },
                 onPasswordQueryChanged = { password = it },
-                isValidEmail = isValidEmail,
-                isValidPassword = isValidPassword,
                 isPasswordVisible = false,
                 onPasswordVisible = {}
             )
@@ -93,8 +75,6 @@ fun AuthForm(
     onPasswordQueryChanged: (password: String) -> Unit,
     isPasswordVisible: Boolean,
     onPasswordVisible: (visible: Boolean) -> Unit,
-    isValidEmail: Boolean,
-    isValidPassword: Boolean,
     modifier: Modifier = Modifier,
     content: (@Composable () -> Unit)? = null
 ) {
@@ -123,7 +103,7 @@ fun AuthForm(
             },
             maxLines = 1,
             supportingText = {
-                if (!isValidEmail)
+                if (email.isNotEmpty() && !email.isEmail())
                     Text(text = stringResource(R.string.invalid_email_message))
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -134,7 +114,7 @@ fun AuthForm(
             label = {
                 Text(text = stringResource(R.string.email_hint))
             },
-            isError = !isValidEmail
+            isError = email.isNotEmpty() && !email.isEmail()
         )
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
@@ -153,7 +133,7 @@ fun AuthForm(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             maxLines = 1,
             supportingText = {
-                if (!isValidPassword)
+                if (password.isNotEmpty() && !password.isPasswordSecure())
                     Text(text = stringResource(R.string.invalid_password_message))
             },
             label = {
@@ -180,7 +160,7 @@ fun AuthForm(
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
                 disabledBorderColor = MaterialTheme.colorScheme.primary
             ),
-            isError = !isValidPassword
+            isError = password.isNotEmpty() && !password.isPasswordSecure()
         )
         if (content != null) {
             content()

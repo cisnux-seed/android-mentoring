@@ -17,4 +17,8 @@
     <string name="reset_success_message">Great news! Your password has been successfully reset</string>
     <string name="reset_password_message_display">No worries, we’ll send you reset instructions</string>
     <string name="reset_password_display">Forgot Password?</string>
+    <string name="invalid_experience_message">experience level must be filled</string>
+    <string name="invalid_job_message">job must be filled</string>
+    <string name="invalid_username_message">username must be filled</string>
+    <string name="invalid_full_name_message">full name must be filled</string>
 </resources>

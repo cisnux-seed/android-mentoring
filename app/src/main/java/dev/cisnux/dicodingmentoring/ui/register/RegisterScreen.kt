@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.ui.register
 
 import android.content.Context
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,11 +44,13 @@ import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.ui.components.AuthForm
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import dev.cisnux.dicodingmentoring.utils.UiState
+import dev.cisnux.dicodingmentoring.utils.isEmail
+import dev.cisnux.dicodingmentoring.utils.isPasswordSecure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalComposeUiApi::class)
-@Preview
+@Preview(showSystemUi = true)
 @Composable
 fun RegisterBodyPreview() {
     DicodingMentoringTheme {
@@ -55,8 +60,6 @@ fun RegisterBodyPreview() {
         ) {
             val email = ""
             val password = ""
-            val isValidEmail = true
-            val isValidPassword = true
 
             val scope = rememberCoroutineScope()
             val snackbarHostState = remember {
@@ -71,8 +74,6 @@ fun RegisterBodyPreview() {
                 onPasswordQueryChanged = {},
                 onAuthEmailPassword = { /*TODO*/ },
                 authButtonTitle = stringResource(id = R.string.sign_up_title_button),
-                isValidEmail = isValidEmail,
-                isValidPassword = isValidPassword,
                 context = context,
                 snackbarHostState = snackbarHostState,
                 scope = scope,
@@ -80,7 +81,8 @@ fun RegisterBodyPreview() {
                 isPasswordVisible = true,
                 isLoading = false,
                 onPasswordVisible = {},
-                keyboardController = LocalSoftwareKeyboardController.current
+                keyboardController = LocalSoftwareKeyboardController.current,
+                scrollState = rememberScrollState()
             )
         }
     }
@@ -96,8 +98,6 @@ fun RegisterScreen(
 ) {
     val email by viewModel.email
     val password by viewModel.password
-    val isValidEmail by viewModel.isValidEmail
-    val isValidPassword by viewModel.isValidPassword
     val isPasswordVisible by viewModel.isPasswordVisible
     val isLoading by viewModel.isLoading
 
@@ -105,6 +105,7 @@ fun RegisterScreen(
     val snackbarHostState = remember {
         SnackbarHostState()
     }
+    val scrollState = rememberScrollState()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -138,8 +139,6 @@ fun RegisterScreen(
             onPasswordQueryChanged = viewModel::onPasswordQueryChanged,
             onAuthEmailPassword = { viewModel.register() },
             authButtonTitle = stringResource(id = R.string.sign_up_title_button),
-            isValidEmail = isValidEmail,
-            isValidPassword = isValidPassword,
             context = context,
             snackbarHostState = snackbarHostState,
             scope = scope,
@@ -148,7 +147,8 @@ fun RegisterScreen(
             isPasswordVisible = isPasswordVisible,
             isLoading = isLoading,
             onPasswordVisible = viewModel::onPasswordVisible,
-            keyboardController = keyboardController
+            keyboardController = keyboardController,
+            scrollState = scrollState,
         )
     }
 }
@@ -162,8 +162,6 @@ fun RegisterBody(
     onPasswordQueryChanged: (password: String) -> Unit,
     onAuthEmailPassword: () -> Unit,
     authButtonTitle: String,
-    isValidEmail: Boolean,
-    isValidPassword: Boolean,
     context: Context,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
@@ -173,28 +171,27 @@ fun RegisterBody(
     isPasswordVisible: Boolean,
     onPasswordVisible: (visible: Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState,
 ) {
     AuthForm(
         email = email,
         password = password,
         onEmailQueryChanged = onEmailQueryChanged,
         onPasswordQueryChanged = onPasswordQueryChanged,
-        isValidEmail = isValidEmail,
-        isValidPassword = isValidPassword,
-        modifier = modifier,
+        modifier = modifier.verticalScroll(scrollState),
         isPasswordVisible = isPasswordVisible,
         onPasswordVisible = onPasswordVisible
     ) {
         Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = {
-                if (!isValidEmail) {
+                if (!email.isEmail()) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_email_message))
                     }
                     return@Button
                 }
-                if (!isValidPassword) {
+                if (!password.isPasswordSecure()) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_password_message))
                     }
@@ -227,7 +224,9 @@ fun RegisterBody(
                 }
             },
             textAlign = TextAlign.Center,
-            modifier = Modifier.clickable(onClick = navigateToSignIn).fillMaxWidth(),
+            modifier = Modifier
+                .clickable(onClick = navigateToSignIn)
+                .fillMaxWidth(),
             style = MaterialTheme.typography.labelLarge
         )
     }

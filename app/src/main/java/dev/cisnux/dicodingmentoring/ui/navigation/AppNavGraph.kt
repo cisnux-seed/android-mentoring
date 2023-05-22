@@ -3,11 +3,14 @@ package dev.cisnux.dicodingmentoring.ui.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
 import dev.cisnux.dicodingmentoring.ui.register.RegisterScreen
+import dev.cisnux.dicodingmentoring.ui.registerprofile.RegisterProfileScreen
 import dev.cisnux.dicodingmentoring.ui.resetpassword.ResetPasswordScreen
 
 @Composable
@@ -36,7 +39,7 @@ fun AppNavGraph(
             route = AppDestinations.REGISTER_ROUTE,
         ) {
             RegisterScreen(
-                navigateToHome = navigationActions.navigateToHome,
+                navigateToHome = navigationActions.navigateToRegisterProfile,
                 navigateToLogin = navigationActions.navigateUp
             )
         }
@@ -50,7 +53,25 @@ fun AppNavGraph(
         composable(
             route = AppDestinations.HOME_ROUTE
         ) {
-            HomeScreen(navigateToLogin = navigationActions.navigateToLogin)
+            HomeScreen(
+                navigateToLogin = navigationActions.navigateToLogin,
+                navigateToRegisterProfile = navigationActions.navigateToRegisterProfile
+            )
+        }
+        composable(
+            route = AppDestinations.PROFILE_ROUTE,
+            arguments = listOf(navArgument("id") {
+                type = NavType.StringType
+            })
+        ) {
+            val id = it.arguments?.getString("id")
+            id?.let { uid ->
+                RegisterProfileScreen(
+                    id = uid,
+                    onNavigateToHome = navigationActions.navigateToHome,
+                    takePictureFromGallery = navigationActions.takePictureFromGallery
+                )
+            }
         }
     }
 }

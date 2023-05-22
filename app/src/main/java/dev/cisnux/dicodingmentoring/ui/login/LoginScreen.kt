@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
 import android.content.Context
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -43,6 +46,8 @@ import dev.cisnux.dicodingmentoring.ui.components.AuthForm
 import dev.cisnux.dicodingmentoring.ui.components.GoogleSignInButton
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import dev.cisnux.dicodingmentoring.utils.UiState
+import dev.cisnux.dicodingmentoring.utils.isEmail
+import dev.cisnux.dicodingmentoring.utils.isPasswordSecure
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -57,8 +62,6 @@ fun LoginBodyPreview() {
         ) {
             val email = ""
             val password = ""
-            val isValidEmail = true
-            val isValidPassword = true
 
             val scope = rememberCoroutineScope()
             val snackbarHostState = remember {
@@ -74,8 +77,6 @@ fun LoginBodyPreview() {
                 onAuthEmailPassword = { /*TODO*/ },
                 onAuthGoogle = { /*TODO*/ },
                 authButtonTitle = stringResource(id = R.string.sign_up_title_button),
-                isValidEmail = isValidEmail,
-                isValidPassword = isValidPassword,
                 context = context,
                 snackbarHostState = snackbarHostState,
                 scope = scope,
@@ -84,7 +85,8 @@ fun LoginBodyPreview() {
                 isPasswordVisible = false,
                 onPasswordVisible = {},
                 navigateToResetPassword = {},
-                        keyboardController = LocalSoftwareKeyboardController.current
+                keyboardController = LocalSoftwareKeyboardController.current,
+                scrollState = rememberScrollState()
             )
         }
     }
@@ -93,7 +95,7 @@ fun LoginBodyPreview() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
-    navigateToHome: (uid: String) -> Unit,
+    navigateToHome: () -> Unit,
     navigateToRegister: () -> Unit,
     navigateToResetPassword: () -> Unit,
     modifier: Modifier = Modifier,
@@ -101,8 +103,6 @@ fun LoginScreen(
 ) {
     val email by viewModel.email
     val password by viewModel.password
-    val isValidEmail by viewModel.isValidEmail
-    val isValidPassword by viewModel.isValidPassword
     val isLoading by viewModel.isLoading
     val isPasswordVisible by viewModel.isPasswordVisible
 
@@ -110,6 +110,7 @@ fun LoginScreen(
     val snackbarHostState = remember {
         SnackbarHostState()
     }
+    val scrollState = rememberScrollState()
     val launcher = rememberGoogleAuthLauncher(
         onLogin = { token ->
             viewModel.googleSignIn(token)
@@ -122,7 +123,7 @@ fun LoginScreen(
 
     when (loginState) {
         is UiState.Success -> {
-            (loginState as UiState.Success).data?.uid?.let(navigateToHome)
+            navigateToHome()
         }
 
         is UiState.Error -> {
@@ -150,8 +151,6 @@ fun LoginScreen(
             onAuthEmailPassword = { viewModel.login() },
             onAuthGoogle = { launcher.launch(viewModel.googleSignInClient.signInIntent) },
             authButtonTitle = stringResource(id = R.string.sign_in_title_button),
-            isValidEmail = isValidEmail,
-            isValidPassword = isValidPassword,
             context = context,
             snackbarHostState = snackbarHostState,
             scope = scope,
@@ -161,7 +160,8 @@ fun LoginScreen(
             isPasswordVisible = isPasswordVisible,
             navigateToResetPassword = navigateToResetPassword,
             onPasswordVisible = viewModel::onPasswordVisible,
-            keyboardController = keyboardController
+            keyboardController = keyboardController,
+            scrollState = scrollState,
         )
     }
 }
@@ -176,8 +176,6 @@ fun LoginBody(
     onAuthEmailPassword: () -> Unit,
     onAuthGoogle: () -> Unit,
     authButtonTitle: String,
-    isValidEmail: Boolean,
-    isValidPassword: Boolean,
     context: Context,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
@@ -187,6 +185,7 @@ fun LoginBody(
     navigateToResetPassword: () -> Unit,
     onPasswordVisible: (visible: Boolean) -> Unit,
     isPasswordVisible: Boolean,
+    scrollState: ScrollState,
     modifier: Modifier = Modifier,
 ) {
     AuthForm(
@@ -194,11 +193,9 @@ fun LoginBody(
         password = password,
         onEmailQueryChanged = onEmailQueryChanged,
         onPasswordQueryChanged = onPasswordQueryChanged,
-        isValidEmail = isValidEmail,
-        isValidPassword = isValidPassword,
         isPasswordVisible = isPasswordVisible,
         onPasswordVisible = onPasswordVisible,
-        modifier = modifier
+        modifier = modifier.verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -213,13 +210,13 @@ fun LoginBody(
         Spacer(modifier = Modifier.height(12.dp))
         Button(
             onClick = {
-                if (!isValidEmail) {
+                if (!email.isEmail()) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_email_message))
                     }
                     return@Button
                 }
-                if (!isValidPassword) {
+                if (!password.isPasswordSecure()) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_password_message))
                     }
@@ -256,7 +253,9 @@ fun LoginBody(
                 }
             },
             textAlign = TextAlign.Center,
-            modifier = Modifier.clickable(onClick = navigateToSignUp).fillMaxWidth(),
+            modifier = Modifier
+                .clickable(onClick = navigateToSignUp)
+                .fillMaxWidth(),
             style = MaterialTheme.typography.labelLarge,
         )
     }

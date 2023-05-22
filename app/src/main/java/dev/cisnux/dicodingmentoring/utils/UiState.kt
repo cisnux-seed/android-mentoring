@@ -1,5 +1,8 @@
 package dev.cisnux.dicodingmentoring.utils
 
+import androidx.compose.runtime.Stable
+
+@Stable
 sealed class UiState<out T: Any?> {
 
     object Loading : UiState<Nothing>()
