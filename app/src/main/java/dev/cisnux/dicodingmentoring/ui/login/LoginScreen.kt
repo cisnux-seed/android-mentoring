@@ -45,6 +45,7 @@ import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.ui.components.AuthForm
 import dev.cisnux.dicodingmentoring.ui.components.GoogleSignInButton
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
+import dev.cisnux.dicodingmentoring.utils.Failure
 import dev.cisnux.dicodingmentoring.utils.UiState
 import dev.cisnux.dicodingmentoring.utils.isEmail
 import dev.cisnux.dicodingmentoring.utils.isPasswordSecure
@@ -97,6 +98,7 @@ fun LoginBodyPreview() {
 fun LoginScreen(
     navigateToHome: () -> Unit,
     navigateToRegister: () -> Unit,
+    navigateToRegisterProfile: (String) -> Unit,
     navigateToResetPassword: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
@@ -123,13 +125,20 @@ fun LoginScreen(
 
     when (loginState) {
         is UiState.Success -> {
+            viewModel.currentUserId?.let { id ->
+                viewModel.saveAuthSession(id, true)
+            }
             navigateToHome()
         }
 
         is UiState.Error -> {
-            (loginState as UiState.Error).error?.message?.let { message ->
-                LaunchedEffect(snackbarHostState) {
-                    snackbarHostState.showSnackbar(message)
+            (loginState as UiState.Error).error?.let { exception ->
+                if (exception is Failure.NotFoundFailure) {
+                    viewModel.currentUserId?.let(navigateToRegisterProfile)
+                } else {
+                    LaunchedEffect(snackbarHostState) {
+                        exception.message?.let { snackbarHostState.showSnackbar(it) }
+                    }
                 }
             }
         }
@@ -148,8 +157,8 @@ fun LoginScreen(
             password = password,
             onEmailQueryChanged = viewModel::onEmailQueryChanged,
             onPasswordQueryChanged = viewModel::onPasswordQueryChanged,
-            onAuthEmailPassword = { viewModel.login() },
-            onAuthGoogle = { launcher.launch(viewModel.googleSignInClient.signInIntent) },
+            onAuthEmailPassword = { viewModel.loginWithEmailAndPassword() },
+            onAuthGoogle = { launcher.launch(viewModel.getGoogleIntent) },
             authButtonTitle = stringResource(id = R.string.sign_in_title_button),
             context = context,
             snackbarHostState = snackbarHostState,

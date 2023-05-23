@@ -1,18 +1,13 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.domain.models.AuthUser
-import dev.cisnux.dicodingmentoring.domain.models.AuthenticatedUser
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
-import dev.cisnux.dicodingmentoring.utils.isEmail
-import dev.cisnux.dicodingmentoring.utils.isPasswordSecure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,27 +16,17 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val repository: AuthRepository,
-    private val googleClient: GoogleSignInClient
 ) : ViewModel() {
-    private val _loginState = MutableStateFlow<UiState<AuthenticatedUser>>(UiState.Loading)
-    val loginState: StateFlow<UiState<AuthenticatedUser>> get() = _loginState
-    val googleSignInClient get() = googleClient
+    val currentUserId get() = repository.currentUser()?.uid
+    val getGoogleIntent get() = repository.getGoogleIntent()
+    private val _loginState = MutableStateFlow<UiState<String?>>(UiState.Loading)
+    val loginState: StateFlow<UiState<String?>> get() = _loginState
 
     private val _email = mutableStateOf("")
     val email: State<String> get() = _email
-    val isValidEmail: State<Boolean> = derivedStateOf {
-        if (_email.value.isNotEmpty())
-            _email.value.isEmail()
-        else false
-    }
 
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
-    val isValidPassword: State<Boolean> = derivedStateOf {
-        if (_password.value.isNotEmpty())
-            _password.value.isPasswordSecure()
-        else false
-    }
 
     private val _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> get() = _isLoading
@@ -53,10 +38,10 @@ class LoginViewModel @Inject constructor(
         _isPasswordVisible.value = !visible
     }
 
-    fun login() = viewModelScope.launch {
+    fun loginWithEmailAndPassword() = viewModelScope.launch {
         _isLoading.value = true
         val authUser = AuthUser(email = _email.value, password = _password.value)
-        val result = repository.login(authUser)
+        val result = repository.signInWithEmailAndPassword(authUser)
         result.fold(
             {
                 _isLoading.value = false
@@ -80,6 +65,10 @@ class LoginViewModel @Inject constructor(
                 _loginState.value = UiState.Success(it)
             }
         )
+    }
+
+    fun saveAuthSession(id: String, session: Boolean) = viewModelScope.launch {
+        repository.saveAuthSession(id, session)
     }
 
     fun onEmailQueryChanged(email: String) {

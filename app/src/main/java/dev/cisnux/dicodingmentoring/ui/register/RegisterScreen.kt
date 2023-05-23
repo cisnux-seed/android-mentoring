@@ -91,7 +91,7 @@ fun RegisterBodyPreview() {
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterScreen(
-    navigateToHome: (uid: String) -> Unit,
+    navigateToRegisterProfile: (uid: String) -> Unit,
     navigateToLogin: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RegisterViewModel = hiltViewModel(),
@@ -113,7 +113,7 @@ fun RegisterScreen(
 
     when (registerState) {
         is UiState.Success -> {
-            (registerState as UiState.Success).data?.uid?.let(navigateToHome)
+            (registerState as UiState.Success).data?.uid?.let(navigateToRegisterProfile)
         }
 
         is UiState.Error -> {

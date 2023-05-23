@@ -10,7 +10,7 @@ import retrofit2.http.Path
 
 interface UserProfileService {
     @Multipart
-    @POST("userProfiles/{id}")
+    @POST("profile/{id}")
     suspend fun postUserProfile(
         @Path("id") id: String,
         @Part photoProfile: MultipartBody.Part?,
@@ -18,12 +18,12 @@ interface UserProfileService {
         @Part("username") username: RequestBody,
         @Part("email") email: RequestBody,
         @Part("job") job: RequestBody,
-        @Part("interests[]") interests: List<RequestBody>,
+        @Part("interests") interests: RequestBody,
         @Part("experienceLevel") experienceLevel: RequestBody,
         @Part("motto") motto: RequestBody?,
     )
 
-    @GET("userProfiles/{id}")
+    @GET("profile/{id}")
     suspend fun getUserProfilesById(
         @Path("id") id: String,
     ): UserProfileResponse

@@ -1,14 +1,20 @@
 package dev.cisnux.dicodingmentoring.data.remote
 
-import dev.cisnux.dicodingmentoring.domain.models.AddUserProfile
-import dev.cisnux.dicodingmentoring.domain.models.GetUserProfile
-import dev.cisnux.dicodingmentoring.utils.UiState
-import kotlinx.coroutines.flow.Flow
+import dev.cisnux.dicodingmentoring.data.services.UserProfileResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 
 interface UserProfileRemoteDataSource {
-    fun getUserProfileById(id: String): Flow<UiState<GetUserProfile>>
-    fun postUserProfile(
-        userProfile: AddUserProfile
-    ): Flow<UiState<Nothing>>
-     fun isUserProfileExist(id: String): Flow<UiState<Boolean>>
+    suspend fun getUserProfileById(id: String): UserProfileResponse
+    suspend fun postUserProfile(
+        id: String,
+        photoProfile: MultipartBody.Part?,
+        fullName: RequestBody,
+        username: RequestBody,
+        email: RequestBody,
+        job: RequestBody,
+        interests: RequestBody,
+        experienceLevel: RequestBody,
+        motto: RequestBody?,
+    )
 }

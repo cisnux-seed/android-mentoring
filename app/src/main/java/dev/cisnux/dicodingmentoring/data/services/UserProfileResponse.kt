@@ -6,7 +6,7 @@ import dev.cisnux.dicodingmentoring.domain.models.GetUserProfile
 data class UserProfileResponse(
 
     @Json(name = "data")
-    val data: UserProfileData? = null
+    val data: UserProfileData
 )
 
 data class UserProfileData(

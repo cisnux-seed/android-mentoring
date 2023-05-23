@@ -19,8 +19,7 @@ object NetworkModule {
         val loggingInterceptor =
             HttpLoggingInterceptor()
                 .setLevel(
-                    if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BODY
-                    else HttpLoggingInterceptor.Level.NONE
+                    HttpLoggingInterceptor.Level.BODY
                 )
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)

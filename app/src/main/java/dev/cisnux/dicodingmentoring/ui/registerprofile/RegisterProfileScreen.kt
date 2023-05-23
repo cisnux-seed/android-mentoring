@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.Image
@@ -86,13 +87,13 @@ fun RegisterProfileScreen(
     val isExpanded by viewModel.isExpanded
     val pictureFromGallery by viewModel.pictureFromGallery
     val isLoading by viewModel.isLoading
-    val isCheckedEmpty = viewModel.isCheckedEmpty
     val checked1State by viewModel.checked1State
     val checked2State by viewModel.checked2State
     val checked3State by viewModel.checked3State
     val checked4State by viewModel.checked4State
     val checked5State by viewModel.checked5State
     val checkedParentState by viewModel.checkedParentState
+    val isCheckedEmpty by viewModel.isCheckedEmpty
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember {
@@ -125,6 +126,7 @@ fun RegisterProfileScreen(
         }
 
         is UiState.Success -> {
+            viewModel.saveAuthSession(id, true)
             onNavigateToHome()
         }
 
@@ -467,7 +469,9 @@ fun RegisterProfileBody(
         }
         checkBoxItems.forEach { checkBoxItem ->
             Row(
-                modifier = modifier.fillMaxWidth().padding(start = 12.dp),
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(start = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
@@ -508,6 +512,7 @@ fun RegisterProfileBody(
                     }
                     return@Button
                 }
+                Log.d("RegisterProfileScreen", isCheckedEmpty.toString())
                 if (isCheckedEmpty) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = "you must select at least one of the interests")

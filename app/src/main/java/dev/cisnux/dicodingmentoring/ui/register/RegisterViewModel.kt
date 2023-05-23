@@ -1,7 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.register
 
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,8 +9,6 @@ import dev.cisnux.dicodingmentoring.domain.models.AuthUser
 import dev.cisnux.dicodingmentoring.domain.models.AuthenticatedUser
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
-import dev.cisnux.dicodingmentoring.utils.isEmail
-import dev.cisnux.dicodingmentoring.utils.isPasswordSecure
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

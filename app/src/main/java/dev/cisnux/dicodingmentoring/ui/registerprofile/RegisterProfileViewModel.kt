@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.state.ToggleableState
 import androidx.lifecycle.ViewModel
@@ -15,7 +16,6 @@ import dev.cisnux.dicodingmentoring.domain.repositories.UserProfileRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,8 +23,7 @@ import javax.inject.Inject
 class RegisterProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val userProfileRepo: UserProfileRepository
-) :
-    ViewModel() {
+) : ViewModel() {
     private val _fullName = mutableStateOf("")
     val fullName: State<String> get() = _fullName
     private val _username = mutableStateOf("")
@@ -61,16 +60,18 @@ class RegisterProfileViewModel @Inject constructor(
         else ToggleableState.Indeterminate
     }
 
-    private val _createProfileState = MutableStateFlow<UiState<Nothing>>(UiState.Loading)
-    val createProfileState: StateFlow<UiState<Nothing>> get() = _createProfileState
+    private val _createProfileState = MutableStateFlow<UiState<Nothing?>>(UiState.Loading)
+    val createProfileState: StateFlow<UiState<Nothing?>> get() = _createProfileState
 
     private val _pictureFromGallery = mutableStateOf<Uri?>(null)
     val pictureFromGallery: State<Uri?> get() = _pictureFromGallery
 
     private val checkedInterests =
-        mutableListOf("Android", "iOS", "Front-End", "Back-End", "Cloud Computing")
+        mutableStateListOf("Android", "iOS", "Front-End", "Back-End", "Cloud Computing")
+    val isCheckedEmpty = derivedStateOf {
+        checkedInterests.isEmpty()
+    }
     val interests: List<String> = listOf(*checkedInterests.toTypedArray())
-    val isCheckedEmpty = checkedInterests.isEmpty()
 
     fun onChecked1State(checked: Boolean) {
         _checked1State.value = checked
@@ -137,26 +138,34 @@ class RegisterProfileViewModel @Inject constructor(
         _experienceLevel.value = experienceLevel
     }
 
+    fun saveAuthSession(id: String, session: Boolean) = viewModelScope.launch {
+        authRepository.saveAuthSession(id, session)
+    }
+
     fun onCreateProfile(id: String) = viewModelScope.launch {
         _isLoading.value = true
-        val email = authRepository.currentUser().last()?.email
+        val email = authRepository.currentUser()?.email
 
-        email?.let {
+        email?.let { userEmail ->
             val addUserProfile = AddUserProfile(
                 id = id,
                 fullName = fullName.value,
                 username = username.value,
-                email = it,
+                email = userEmail,
                 job = job.value,
                 experienceLevel = experienceLevel.value,
-                interests = emptyList(),
+                interests = checkedInterests,
                 photoProfileUri = pictureFromGallery.value,
                 motto = motto.value
             )
-            userProfileRepo.postUserProfile(addUserProfile).collect { uiState ->
-                _isLoading.value = uiState != UiState.Loading
-                _createProfileState.value = uiState
-            }
+            userProfileRepo.postUserProfile(addUserProfile).fold(
+                {
+                    _createProfileState.value = UiState.Error(it)
+                },
+                {
+                    _createProfileState.value = UiState.Success(it)
+                }
+            )
         }
     }
 }
