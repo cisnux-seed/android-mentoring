@@ -8,7 +8,7 @@ data class GetUserProfile(
     val job: String,
     val experienceLevel: String,
     val interests: List<String>,
-    val motto: String? = null,
+    val about: String,
     val photoProfileUrl: String? = null,
     val skills: String? = null,
     val rating: Double? = null,

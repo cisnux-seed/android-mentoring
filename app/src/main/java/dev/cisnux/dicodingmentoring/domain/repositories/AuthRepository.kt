@@ -15,5 +15,6 @@ interface AuthRepository {
     suspend fun saveAuthSession(id: String, session: Boolean)
     fun getGoogleIntent(): Intent
     fun logout()
+    suspend fun logout(id: String)
     fun currentUser(): AuthenticatedUser?
 }

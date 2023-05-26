@@ -68,7 +68,7 @@ class UserProfileRepositoryImpl @Inject constructor(
                         .toRequestBody("text/plain".toMediaType())
                 val experienceLevel =
                     userProfile.experienceLevel.toRequestBody("text/plain".toMediaType())
-                val motto = userProfile.motto?.toRequestBody("text/plain".toMediaType())
+                val about = userProfile.about.toRequestBody("text/plain".toMediaType())
                 val requestImageFile = photoFile?.asRequestBody("image/jpg".toMediaType())
                 val imageMultipart = requestImageFile?.let {
                     MultipartBody.Part.createFormData(
@@ -86,7 +86,7 @@ class UserProfileRepositoryImpl @Inject constructor(
                     job,
                     interests,
                     experienceLevel,
-                    motto,
+                    about,
                 )
                 Either.Right(null)
             } catch (e: IOException) {

@@ -19,7 +19,7 @@ class LoginViewModel @Inject constructor(
 ) : ViewModel() {
     val currentUserId get() = repository.currentUser()?.uid
     val getGoogleIntent get() = repository.getGoogleIntent()
-    private val _loginState = MutableStateFlow<UiState<String?>>(UiState.Loading)
+    private val _loginState = MutableStateFlow<UiState<String?>>(UiState.Initialize)
     val loginState: StateFlow<UiState<String?>> get() = _loginState
 
     private val _email = mutableStateOf("")
@@ -28,40 +28,26 @@ class LoginViewModel @Inject constructor(
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> get() = _isLoading
-
-    private val _isPasswordVisible = mutableStateOf(false)
-    val isPasswordVisible: State<Boolean> get() = _isPasswordVisible
-
-    fun onPasswordVisible(visible: Boolean) {
-        _isPasswordVisible.value = !visible
-    }
-
     fun loginWithEmailAndPassword() = viewModelScope.launch {
-        _isLoading.value = true
+        _loginState.value = UiState.Loading
         val authUser = AuthUser(email = _email.value, password = _password.value)
         val result = repository.signInWithEmailAndPassword(authUser)
         result.fold(
             {
-                _isLoading.value = false
                 _loginState.value = UiState.Error(it)
             }, {
-                _isLoading.value = false
                 _loginState.value = UiState.Success(it)
             }
         )
     }
 
     fun googleSignIn(token: String?) = viewModelScope.launch {
-        _isLoading.value = false
+        _loginState.value = UiState.Loading
         val result = repository.signInWithGoogle(token)
         result.fold(
             {
-                _isLoading.value = false
                 _loginState.value = UiState.Error(it)
             }, {
-                _isLoading.value = false
                 _loginState.value = UiState.Success(it)
             }
         )

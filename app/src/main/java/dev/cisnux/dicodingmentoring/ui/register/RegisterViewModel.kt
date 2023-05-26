@@ -18,7 +18,7 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
-    private val _registerState = MutableStateFlow<UiState<AuthenticatedUser>>(UiState.Loading)
+    private val _registerState = MutableStateFlow<UiState<AuthenticatedUser>>(UiState.Initialize)
     val registerState: StateFlow<UiState<AuthenticatedUser>> get() = _registerState
 
     private val _email = mutableStateOf("")
@@ -27,26 +27,14 @@ class RegisterViewModel @Inject constructor(
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
-    private val _isPasswordVisible = mutableStateOf(false)
-    val isPasswordVisible: State<Boolean> get() = _isPasswordVisible
-
-    fun onPasswordVisible(visible: Boolean) {
-        _isPasswordVisible.value = !visible
-    }
-
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> get() = _isLoading
-
     fun register() = viewModelScope.launch {
-        _isLoading.value = true
+        _registerState.value = UiState.Loading
         val authUser = AuthUser(email = _email.value, password = _password.value)
         val result = repository.register(authUser)
         result.fold(
             {
-                _isLoading.value = false
                 _registerState.value = UiState.Error(it)
             }, {
-                _isLoading.value = false
                 _registerState.value = UiState.Success(it)
             }
         )

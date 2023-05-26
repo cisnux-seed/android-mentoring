@@ -8,3 +8,5 @@ fun String.isEmail(): Boolean {
 }
 
 fun String.isPasswordSecure(): Boolean = this.trim().length >= 8
+
+fun String.isValidAbout(maxLength: Int) = length <= 80

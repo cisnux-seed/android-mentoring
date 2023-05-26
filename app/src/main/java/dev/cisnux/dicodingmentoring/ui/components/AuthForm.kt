@@ -59,8 +59,6 @@ fun AuthFormPreview() {
                 password = password,
                 onEmailQueryChanged = { email = it },
                 onPasswordQueryChanged = { password = it },
-                isPasswordVisible = false,
-                onPasswordVisible = {}
             )
         }
     }
@@ -73,11 +71,13 @@ fun AuthForm(
     password: String,
     onEmailQueryChanged: (email: String) -> Unit,
     onPasswordQueryChanged: (password: String) -> Unit,
-    isPasswordVisible: Boolean,
-    onPasswordVisible: (visible: Boolean) -> Unit,
     modifier: Modifier = Modifier,
     content: (@Composable () -> Unit)? = null
 ) {
+    var isPasswordVisible by remember {
+        mutableStateOf(false)
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -140,7 +140,7 @@ fun AuthForm(
                 Text(text = stringResource(R.string.password_hint))
             },
             trailingIcon = {
-                IconButton(onClick = { onPasswordVisible(isPasswordVisible) }) {
+                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                     Icon(
                         tint = MaterialTheme.colorScheme.primary,
                         painter =

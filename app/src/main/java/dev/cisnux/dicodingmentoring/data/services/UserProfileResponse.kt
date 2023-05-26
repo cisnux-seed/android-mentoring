@@ -43,8 +43,8 @@ data class UserProfileData(
     @Json(name = "rating")
     val rating: Double? = null,
 
-    @Json(name = "motto")
-    val motto: String? = null,
+    @Json(name = "about")
+    val about: String,
 
     @Json(name = "expertises")
     val expertises: String? = null,
@@ -58,7 +58,7 @@ fun UserProfileData.asGetUserProfile() = GetUserProfile(
     job,
     experienceLevel,
     interests,
-    motto,
+    about,
     photoProfileUrl,
     skills,
     rating,

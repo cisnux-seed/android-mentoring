@@ -15,6 +15,6 @@ interface UserProfileRemoteDataSource {
         job: RequestBody,
         interests: RequestBody,
         experienceLevel: RequestBody,
-        motto: RequestBody?,
+        about: RequestBody,
     )
 }

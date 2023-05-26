@@ -11,5 +11,5 @@ data class AddUserProfile(
     val experienceLevel: String,
     val interests: List<String>,
     val photoProfileUri: Uri? = null,
-    val motto: String? = null,
+    val about: String,
 )

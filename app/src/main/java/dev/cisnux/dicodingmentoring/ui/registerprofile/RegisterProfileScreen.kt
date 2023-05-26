@@ -44,8 +44,10 @@ import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -56,8 +58,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,6 +70,7 @@ import coil.compose.AsyncImage
 import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.ui.components.rememberGalleryLauncher
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
+import dev.cisnux.dicodingmentoring.utils.CheckBoxItem
 import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -83,39 +88,22 @@ fun RegisterProfileScreen(
     val username by viewModel.username
     val job by viewModel.job
     val experienceLevel by viewModel.experienceLevel
-    val motto by viewModel.motto
-    val isExpanded by viewModel.isExpanded
+    val about by viewModel.about
     val pictureFromGallery by viewModel.pictureFromGallery
-    val isLoading by viewModel.isLoading
-    val checked1State by viewModel.checked1State
-    val checked2State by viewModel.checked2State
-    val checked3State by viewModel.checked3State
-    val checked4State by viewModel.checked4State
-    val checked5State by viewModel.checked5State
-    val checkedParentState by viewModel.checkedParentState
-    val isCheckedEmpty by viewModel.isCheckedEmpty
 
-    val scope = rememberCoroutineScope()
-    val snackbarHostState = remember {
-        SnackbarHostState()
-    }
-    val checkBoxItems = listOf(
-        CheckBoxItem(viewModel.interests.component1(), checked1State, viewModel::onChecked1State),
-        CheckBoxItem(viewModel.interests.component2(), checked2State, viewModel::onChecked2State),
-        CheckBoxItem(viewModel.interests.component3(), checked3State, viewModel::onChecked3State),
-        CheckBoxItem(viewModel.interests.component4(), checked4State, viewModel::onChecked4State),
-        CheckBoxItem(viewModel.interests.component5(), checked5State, viewModel::onChecked5State),
-    )
-    val scrollState = rememberScrollState()
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-
     val launcher = rememberGalleryLauncher(onSuccess = {
         viewModel.setPhotoFromGallery(uri = it)
     })
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+    val scrollState = rememberScrollState()
+    val coroutineScope = rememberCoroutineScope()
+    var checkBoxState by rememberInterestsCheckBoxState()
 
     val createProfileState by viewModel.createProfileState.collectAsStateWithLifecycle()
-
     when (createProfileState) {
         is UiState.Error -> {
             (createProfileState as UiState.Error).error?.message?.let { message ->
@@ -134,12 +122,9 @@ fun RegisterProfileScreen(
         }
     }
 
-    Scaffold(
-        modifier = modifier,
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        }
-    ) { innerPadding ->
+    Scaffold(modifier = modifier, snackbarHost = {
+        SnackbarHost(hostState = snackbarHostState)
+    }) { innerPadding ->
         RegisterProfileBody(
             fullName = fullName,
             username = username,
@@ -148,26 +133,88 @@ fun RegisterProfileScreen(
                 viewModel.onCreateProfile(id)
             },
             onProfilePicture = { takePictureFromGallery(launcher) },
-            isExpanded = isExpanded,
-            onExpandedChanged = viewModel::onExpandedChanged,
             onExperienceLevelOption = viewModel::onExperienceLevelOption,
             experienceLevelOption = experienceLevel,
-            motto = motto,
+            about = about,
             onFullNameQueryChanged = viewModel::onFullNameQueryChanged,
             onUsernameQueryChanged = viewModel::onUsernameQueryChanged,
             onJobQueryChanged = viewModel::onJobQueryChanged,
-            onMottoQueryChanged = viewModel::onMottoQueryChanged,
+            onAboutQueryChanged = viewModel::onAboutQueryChanged,
             snackbarHostState = snackbarHostState,
-            scope = scope,
+            scope = coroutineScope,
             context = context,
             scrollState = scrollState,
             keyboardController = keyboardController,
             modifier = Modifier.padding(innerPadding),
             imageUri = pictureFromGallery,
-            isLoading = isLoading,
-            isCheckedEmpty = isCheckedEmpty,
-            checkedParentState = checkedParentState,
-            checkBoxItems = checkBoxItems
+            isLoading = createProfileState is UiState.Loading,
+            isCheckedEmpty = viewModel.isCheckedEmpty,
+            checkedParentState = checkBoxState.parentState,
+            checkBoxItems = listOf(
+                CheckBoxItem(title = stringResource(id = R.string.android),
+                    checked = checkBoxState.checkBox1State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox1State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+                CheckBoxItem(title = stringResource(id = R.string.ios),
+                    checked = checkBoxState.checkBox2State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox2State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+                CheckBoxItem(title = stringResource(id = R.string.frontend),
+                    checked = checkBoxState.checkBox3State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox3State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+                CheckBoxItem(title = stringResource(id = R.string.backend),
+                    checked = checkBoxState.checkBox4State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox4State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+                CheckBoxItem(title = stringResource(id = R.string.cloud_computing),
+                    checked = checkBoxState.checkBox5State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox5State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+                CheckBoxItem(title = stringResource(id = R.string.machine_learning),
+                    checked = checkBoxState.checkBox6State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox6State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+                CheckBoxItem(title = stringResource(id = R.string.ui_ux),
+                    checked = checkBoxState.checkBox7State,
+                    onCheckedChange = { checked, title ->
+                        checkBoxState = checkBoxState.copy(
+                            checkBox7State = checked
+                        )
+                        viewModel.addInterest(checked = checked, interest = title)
+                    }),
+            ),
+            options = listOf(
+                stringResource(R.string.beginner),
+                stringResource(R.string.intermediate),
+                stringResource(
+                    R.string.expert
+                )
+            )
         )
     }
 
@@ -175,7 +222,8 @@ fun RegisterProfileScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Preview(
-    showBackground = true, showSystemUi = false,
+    showBackground = true,
+    showSystemUi = false,
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable
@@ -187,30 +235,65 @@ fun RegisterProfileBodyPreview() {
                 username = "",
                 job = "",
                 experienceLevelOption = "",
-                motto = "",
+                about = "",
                 onFullNameQueryChanged = {},
                 onUsernameQueryChanged = {},
                 onJobQueryChanged = {},
-                onMottoQueryChanged = {},
+                onAboutQueryChanged = {},
                 keyboardController = null,
                 onCreateProfile = {},
                 context = LocalContext.current,
                 snackbarHostState = SnackbarHostState(),
                 scope = rememberCoroutineScope(),
-                isExpanded = false,
                 onProfilePicture = {},
-                onExpandedChanged = {},
                 onExperienceLevelOption = {},
                 scrollState = rememberScrollState(),
                 isLoading = true,
                 isCheckedEmpty = false,
                 checkedParentState = ToggleableState.On,
                 checkBoxItems = listOf(
-                    CheckBoxItem("Android", true) {},
-                    CheckBoxItem("Android", true) {},
-                    CheckBoxItem("Android", true) {},
-                    CheckBoxItem("Android", true) {},
-                    CheckBoxItem("Android", true) {},
+                    CheckBoxItem(title = stringResource(id = R.string.android),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                    CheckBoxItem(title = stringResource(id = R.string.ios),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                    CheckBoxItem(title = stringResource(id = R.string.frontend),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                    CheckBoxItem(title = stringResource(id = R.string.backend),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                    CheckBoxItem(title = stringResource(id = R.string.cloud_computing),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                    CheckBoxItem(title = stringResource(id = R.string.machine_learning),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                    CheckBoxItem(title = stringResource(id = R.string.ui_ux),
+                        checked = true,
+                        onCheckedChange = { _, _ ->
+
+                        }),
+                ),
+                options = listOf(
+                    stringResource(R.string.beginner),
+                    stringResource(R.string.intermediate),
+                    stringResource(
+                        R.string.expert
+                    )
                 )
             )
         }
@@ -225,17 +308,16 @@ fun RegisterProfileBody(
     job: String,
     onCreateProfile: () -> Unit,
     onProfilePicture: () -> Unit,
-    isExpanded: Boolean,
-    onExpandedChanged: (Boolean) -> Unit,
     onExperienceLevelOption: (String) -> Unit,
     experienceLevelOption: String,
-    motto: String,
+    about: String,
+    options: List<String>,
     isLoading: Boolean,
     checkedParentState: ToggleableState,
     onFullNameQueryChanged: (String) -> Unit,
     onUsernameQueryChanged: (String) -> Unit,
     onJobQueryChanged: (String) -> Unit,
-    onMottoQueryChanged: (String) -> Unit,
+    onAboutQueryChanged: (String) -> Unit,
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope,
     context: Context,
@@ -246,7 +328,9 @@ fun RegisterProfileBody(
     modifier: Modifier = Modifier,
     imageUri: Uri? = null,
 ) {
-    val options = listOf("Beginner", "Intermediate", "Expert")
+    var isExpanded by remember {
+        mutableStateOf(false)
+    }
 
     Column(
         modifier = modifier
@@ -294,8 +378,7 @@ fun RegisterProfileBody(
         OutlinedTextField(
             value = fullName,
             onValueChange = onFullNameQueryChanged,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             leadingIcon = {
                 Icon(
@@ -305,8 +388,7 @@ fun RegisterProfileBody(
                 )
             },
             supportingText = {
-                if (fullName.isNotEmpty() && fullName.isBlank())
-                    Text(text = "Please enter your full name")
+                if (fullName.isNotEmpty() && fullName.isBlank()) Text(text = "Please enter your full name")
             },
             placeholder = {
                 Text(text = "Enter your full name")
@@ -322,8 +404,7 @@ fun RegisterProfileBody(
         OutlinedTextField(
             value = username,
             onValueChange = onUsernameQueryChanged,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             leadingIcon = {
                 Icon(
@@ -333,8 +414,7 @@ fun RegisterProfileBody(
                 )
             },
             supportingText = {
-                if (username.isNotEmpty() && username.isBlank())
-                    Text(text = "Please enter your username")
+                if (username.isNotEmpty() && username.isBlank()) Text(text = "Please enter your username")
             },
             placeholder = {
                 Text(text = "Enter your username")
@@ -350,8 +430,7 @@ fun RegisterProfileBody(
         OutlinedTextField(
             value = job,
             onValueChange = onJobQueryChanged,
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
             leadingIcon = {
                 Icon(
@@ -361,8 +440,7 @@ fun RegisterProfileBody(
                 )
             },
             supportingText = {
-                if (job.isNotEmpty() && job.isBlank())
-                    Text(text = "Please enter your job")
+                if (job.isNotEmpty() && job.isBlank()) Text(text = "Please enter your job")
             },
             placeholder = {
                 Text(text = "Enter your job")
@@ -375,8 +453,8 @@ fun RegisterProfileBody(
             isError = job.isNotEmpty() && job.isBlank()
         )
         Spacer(modifier = Modifier.height(8.dp))
-        ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = { isExpanded ->
-            onExpandedChanged(isExpanded)
+        ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = {
+            isExpanded = it
         }) {
             OutlinedTextField(
                 value = experienceLevelOption,
@@ -396,8 +474,9 @@ fun RegisterProfileBody(
                 },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 supportingText = {
-                    if (experienceLevelOption.isNotEmpty() && experienceLevelOption.isBlank())
-                        Text(text = "Please enter your experience level")
+                    if (experienceLevelOption.isNotEmpty() && experienceLevelOption.isBlank()) Text(
+                        text = "Please enter your experience level"
+                    )
                 },
                 placeholder = {
                     Text(text = "Enter your experience level")
@@ -410,14 +489,14 @@ fun RegisterProfileBody(
                 isError = experienceLevelOption.isNotEmpty() && experienceLevelOption.isBlank()
             )
             ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = {
-                onExpandedChanged(false)
+                isExpanded = false
             }) {
                 options.forEach { selectionOption ->
                     DropdownMenuItem(
                         text = { Text(selectionOption) },
                         onClick = {
                             onExperienceLevelOption(selectionOption)
-                            onExpandedChanged(false)
+                            isExpanded = false
                         },
                         contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
                     )
@@ -426,65 +505,42 @@ fun RegisterProfileBody(
         }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
-            value = motto,
-            onValueChange = onMottoQueryChanged,
-            modifier = Modifier
-                .fillMaxWidth(),
-            maxLines = 1,
-            leadingIcon = {
-                Icon(
-                    tint = MaterialTheme.colorScheme.primary,
-                    painter = painterResource(id = R.drawable.ic_insights_24),
-                    contentDescription = null
-                )
-            },
+            value = about,
+            onValueChange = onAboutQueryChanged,
+            modifier = Modifier.fillMaxWidth(),
             placeholder = {
-                Text(text = "Enter your inspirational word")
+                Text(text = "Tell us us more about yourself")
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
                 disabledBorderColor = MaterialTheme.colorScheme.primary,
             ),
+            supportingText = {
+                Text(
+                    text = "${about.length} / 80",
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End,
+                )
+            }
         )
         Spacer(modifier = Modifier.height(8.dp))
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
-            TriStateCheckbox(state = checkedParentState,
-                onClick = {
-                    val state = checkedParentState != ToggleableState.On
-                    checkBoxItems.component1().onCheckedChange(state)
-                    checkBoxItems.component2().onCheckedChange(state)
-                    checkBoxItems.component3().onCheckedChange(state)
-                    checkBoxItems.component4().onCheckedChange(state)
-                    checkBoxItems.component5().onCheckedChange(state)
+            TriStateCheckbox(state = checkedParentState, onClick = {
+                val state = checkedParentState != ToggleableState.On
+                // check all checkboxes
+                checkBoxItems.forEach {
+                    it.onCheckedChange(state, it.title)
                 }
-            )
+            })
             Spacer(modifier = Modifier.width(2.dp))
             Text(
                 text = "Interests"
             )
         }
-        checkBoxItems.forEach { checkBoxItem ->
-            Row(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = checkBoxItem.checked,
-                    onCheckedChange = checkBoxItem.onCheckedChange
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = checkBoxItem.title
-                )
-            }
-        }
-
+        GridCheckBox(count = 2, checkBoxes = checkBoxItems)
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
@@ -512,7 +568,13 @@ fun RegisterProfileBody(
                     }
                     return@Button
                 }
-                Log.d("RegisterProfileScreen", isCheckedEmpty.toString())
+                if (about.isBlank()) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_about_message))
+                    }
+                    return@Button
+                }
+                Log.d("RegisterProfileScree", isCheckedEmpty.toString())
                 if (isCheckedEmpty) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = "you must select at least one of the interests")
@@ -527,19 +589,42 @@ fun RegisterProfileBody(
                 .fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
         ) {
-            if (!isLoading)
-                Text(text = "Continue")
+            if (!isLoading) Text(text = "Continue")
             else CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier
-                    .size(24.dp)
+                color = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(24.dp)
             )
         }
     }
 }
 
-data class CheckBoxItem(
-    val title: String,
-    val checked: Boolean,
-    val onCheckedChange: (Boolean) -> Unit
-)
+@Composable
+fun GridCheckBox(count: Int, checkBoxes: List<CheckBoxItem>, modifier: Modifier = Modifier) {
+    val gridItems = checkBoxes.chunked(count)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 12.dp)
+    ) {
+        gridItems.forEach {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                it.forEach { checkBoxItem ->
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(checked = checkBoxItem.checked, onCheckedChange = {
+                            checkBoxItem.onCheckedChange(it, checkBoxItem.title)
+                        })
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(
+                            text = checkBoxItem.title
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

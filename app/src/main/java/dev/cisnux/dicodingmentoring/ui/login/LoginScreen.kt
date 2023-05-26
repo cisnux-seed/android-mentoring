@@ -77,14 +77,11 @@ fun LoginBodyPreview() {
                 onPasswordQueryChanged = {},
                 onAuthEmailPassword = { /*TODO*/ },
                 onAuthGoogle = { /*TODO*/ },
-                authButtonTitle = stringResource(id = R.string.sign_up_title_button),
                 context = context,
                 snackbarHostState = snackbarHostState,
                 scope = scope,
                 isLoading = false,
                 navigateToSignUp = {},
-                isPasswordVisible = false,
-                onPasswordVisible = {},
                 navigateToResetPassword = {},
                 keyboardController = LocalSoftwareKeyboardController.current,
                 scrollState = rememberScrollState()
@@ -105,8 +102,6 @@ fun LoginScreen(
 ) {
     val email by viewModel.email
     val password by viewModel.password
-    val isLoading by viewModel.isLoading
-    val isPasswordVisible by viewModel.isPasswordVisible
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember {
@@ -159,16 +154,13 @@ fun LoginScreen(
             onPasswordQueryChanged = viewModel::onPasswordQueryChanged,
             onAuthEmailPassword = { viewModel.loginWithEmailAndPassword() },
             onAuthGoogle = { launcher.launch(viewModel.getGoogleIntent) },
-            authButtonTitle = stringResource(id = R.string.sign_in_title_button),
             context = context,
             snackbarHostState = snackbarHostState,
             scope = scope,
             modifier = modifier.padding(innerPadding),
-            isLoading = isLoading,
+            isLoading = loginState is UiState.Loading,
             navigateToSignUp = navigateToRegister,
-            isPasswordVisible = isPasswordVisible,
             navigateToResetPassword = navigateToResetPassword,
-            onPasswordVisible = viewModel::onPasswordVisible,
             keyboardController = keyboardController,
             scrollState = scrollState,
         )
@@ -184,7 +176,6 @@ fun LoginBody(
     onPasswordQueryChanged: (password: String) -> Unit,
     onAuthEmailPassword: () -> Unit,
     onAuthGoogle: () -> Unit,
-    authButtonTitle: String,
     context: Context,
     scope: CoroutineScope,
     snackbarHostState: SnackbarHostState,
@@ -192,8 +183,6 @@ fun LoginBody(
     keyboardController: SoftwareKeyboardController?,
     navigateToSignUp: () -> Unit,
     navigateToResetPassword: () -> Unit,
-    onPasswordVisible: (visible: Boolean) -> Unit,
-    isPasswordVisible: Boolean,
     scrollState: ScrollState,
     modifier: Modifier = Modifier,
 ) {
@@ -202,8 +191,6 @@ fun LoginBody(
         password = password,
         onEmailQueryChanged = onEmailQueryChanged,
         onPasswordQueryChanged = onPasswordQueryChanged,
-        isPasswordVisible = isPasswordVisible,
-        onPasswordVisible = onPasswordVisible,
         modifier = modifier.verticalScroll(scrollState)
     ) {
         Spacer(modifier = Modifier.height(8.dp))
@@ -242,7 +229,7 @@ fun LoginBody(
             enabled = !isLoading
         ) {
             if (!isLoading)
-                Text(text = authButtonTitle)
+                Text(text = stringResource(id = R.string.sign_in))
             else CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.onPrimary,
                 modifier = Modifier

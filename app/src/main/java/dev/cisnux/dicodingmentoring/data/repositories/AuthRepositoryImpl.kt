@@ -138,6 +138,13 @@ class AuthRepositoryImpl @Inject constructor(
         firebaseAuth.signOut()
     }
 
+    override suspend fun logout(id: String) {
+        googleClient.revokeAccess()
+        googleClient.signOut()
+        firebaseAuth.signOut()
+        authLocalDataSource.deleteSession(id)
+    }
+
     override fun currentUser(): AuthenticatedUser? = firebaseAuth.currentUser?.let { user ->
         user.email?.let { email ->
             AuthenticatedUser(

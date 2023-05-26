@@ -30,4 +30,11 @@ class AuthLocalDataSourceImpl
                 preference[key] = session
             }
         }
+
+    override suspend fun deleteSession(id: String): Unit = withContext(Dispatchers.IO) {
+        val key = booleanPreferencesKey(id)
+        dataStore.edit { preference ->
+            preference.remove(key)
+        }
+    }
 }

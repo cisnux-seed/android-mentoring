@@ -20,7 +20,7 @@ interface UserProfileService {
         @Part("job") job: RequestBody,
         @Part("interests") interests: RequestBody,
         @Part("experienceLevel") experienceLevel: RequestBody,
-        @Part("motto") motto: RequestBody?,
+        @Part("about") about: RequestBody,
     )
 
     @GET("profile/{id}")

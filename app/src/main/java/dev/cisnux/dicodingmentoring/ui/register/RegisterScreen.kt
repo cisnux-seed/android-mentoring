@@ -78,9 +78,7 @@ fun RegisterBodyPreview() {
                 snackbarHostState = snackbarHostState,
                 scope = scope,
                 navigateToSignIn = {},
-                isPasswordVisible = true,
                 isLoading = false,
-                onPasswordVisible = {},
                 keyboardController = LocalSoftwareKeyboardController.current,
                 scrollState = rememberScrollState()
             )
@@ -98,8 +96,6 @@ fun RegisterScreen(
 ) {
     val email by viewModel.email
     val password by viewModel.password
-    val isPasswordVisible by viewModel.isPasswordVisible
-    val isLoading by viewModel.isLoading
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember {
@@ -144,9 +140,7 @@ fun RegisterScreen(
             scope = scope,
             modifier = modifier.padding(innerPadding),
             navigateToSignIn = navigateToLogin,
-            isPasswordVisible = isPasswordVisible,
-            isLoading = isLoading,
-            onPasswordVisible = viewModel::onPasswordVisible,
+            isLoading = registerState is UiState.Loading,
             keyboardController = keyboardController,
             scrollState = scrollState,
         )
@@ -168,8 +162,6 @@ fun RegisterBody(
     keyboardController: SoftwareKeyboardController?,
     navigateToSignIn: () -> Unit,
     isLoading: Boolean,
-    isPasswordVisible: Boolean,
-    onPasswordVisible: (visible: Boolean) -> Unit,
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
 ) {
@@ -179,8 +171,6 @@ fun RegisterBody(
         onEmailQueryChanged = onEmailQueryChanged,
         onPasswordQueryChanged = onPasswordQueryChanged,
         modifier = modifier.verticalScroll(scrollState),
-        isPasswordVisible = isPasswordVisible,
-        onPasswordVisible = onPasswordVisible
     ) {
         Spacer(modifier = Modifier.height(12.dp))
         Button(

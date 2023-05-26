@@ -21,7 +21,7 @@ class UserProfileRemoteDataSourceImpl
         job: RequestBody,
         interests: RequestBody,
         experienceLevel: RequestBody,
-        motto: RequestBody?
+        about: RequestBody
     ) = service.postUserProfile(
         id,
         photoProfile,
@@ -31,7 +31,7 @@ class UserProfileRemoteDataSourceImpl
         job,
         interests,
         experienceLevel,
-        motto
+        about
     )
 
 }
