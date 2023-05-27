@@ -34,33 +34,22 @@ data class UserProfileData(
     @Json(name = "experienceLevel")
     val experienceLevel: String,
 
-    @Json(name = "skills")
-    val skills: String? = null,
-
     @Json(name = "photoProfileUrl")
     val photoProfileUrl: String? = null,
 
-    @Json(name = "rating")
-    val rating: Double? = null,
-
     @Json(name = "about")
     val about: String,
-
-    @Json(name = "expertises")
-    val expertises: String? = null,
 )
 
 fun UserProfileData.asGetUserProfile() = GetUserProfile(
     id = id,
-    fullName,
-    username,
-    email,
-    job,
-    experienceLevel,
-    interests,
-    about,
-    photoProfileUrl,
-    skills,
-    rating,
-    expertises
+    fullName = fullName,
+    username = username,
+    email = email,
+    job = job,
+    experienceLevel = experienceLevel,
+    interests = interests,
+    isMentor = isMentor,
+    about = about,
+    photoProfileUrl = photoProfileUrl,
 )

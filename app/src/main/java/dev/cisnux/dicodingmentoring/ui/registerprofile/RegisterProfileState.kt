@@ -2,6 +2,7 @@ package dev.cisnux.dicodingmentoring.ui.registerprofile
 
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.state.ToggleableState
@@ -24,6 +25,7 @@ fun rememberInterestsCheckBoxState(
 }
 
 
+@Stable
 @Parcelize
 data class InterestsCheckBoxState(
     val checkBox1State: Boolean,

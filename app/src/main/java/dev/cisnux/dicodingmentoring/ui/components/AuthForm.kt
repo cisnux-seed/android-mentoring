@@ -102,6 +102,7 @@ fun AuthForm(
                 )
             },
             maxLines = 1,
+            singleLine = true,
             supportingText = {
                 if (email.isNotEmpty() && !email.isEmail())
                     Text(text = stringResource(R.string.invalid_email_message))
@@ -132,6 +133,7 @@ fun AuthForm(
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             maxLines = 1,
+            singleLine = true,
             supportingText = {
                 if (password.isNotEmpty() && !password.isPasswordSecure())
                     Text(text = stringResource(R.string.invalid_password_message))

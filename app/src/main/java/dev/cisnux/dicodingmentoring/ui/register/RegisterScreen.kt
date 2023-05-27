@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 @Preview(showSystemUi = true)
 @Composable
-fun RegisterBodyPreview() {
+fun RegisterContentPreview() {
     DicodingMentoringTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -67,7 +67,7 @@ fun RegisterBodyPreview() {
             }
             val context = LocalContext.current
 
-            RegisterBody(
+            RegisterContent(
                 email = email,
                 password = password,
                 onEmailQueryChanged = {},
@@ -128,7 +128,7 @@ fun RegisterScreen(
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
-        RegisterBody(
+        RegisterContent(
             email = email,
             password = password,
             onEmailQueryChanged = viewModel::onEmailQueryChanged,
@@ -149,7 +149,7 @@ fun RegisterScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterBody(
+fun RegisterContent(
     email: String,
     password: String,
     onEmailQueryChanged: (email: String) -> Unit,

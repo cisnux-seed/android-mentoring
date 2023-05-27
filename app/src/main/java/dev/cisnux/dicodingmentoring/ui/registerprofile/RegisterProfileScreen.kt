@@ -125,7 +125,7 @@ fun RegisterProfileScreen(
     Scaffold(modifier = modifier, snackbarHost = {
         SnackbarHost(hostState = snackbarHostState)
     }) { innerPadding ->
-        RegisterProfileBody(
+        RegisterProfileContent(
             fullName = fullName,
             username = username,
             job = job,
@@ -227,10 +227,10 @@ fun RegisterProfileScreen(
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable
-fun RegisterProfileBodyPreview() {
+fun RegisterProfileContentPreview() {
     DicodingMentoringTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
-            RegisterProfileBody(
+            RegisterProfileContent(
                 fullName = "",
                 username = "",
                 job = "",
@@ -302,7 +302,7 @@ fun RegisterProfileBodyPreview() {
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun RegisterProfileBody(
+fun RegisterProfileContent(
     fullName: String,
     username: String,
     job: String,
@@ -540,7 +540,7 @@ fun RegisterProfileBody(
                 text = "Interests"
             )
         }
-        GridCheckBox(count = 2, checkBoxes = checkBoxItems)
+        GridCheckBoxInterest(count = 2, checkBoxes = checkBoxItems)
         Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
@@ -598,7 +598,7 @@ fun RegisterProfileBody(
 }
 
 @Composable
-fun GridCheckBox(count: Int, checkBoxes: List<CheckBoxItem>, modifier: Modifier = Modifier) {
+fun GridCheckBoxInterest(count: Int, checkBoxes: List<CheckBoxItem>, modifier: Modifier = Modifier) {
     val gridItems = checkBoxes.chunked(count)
 
     Column(

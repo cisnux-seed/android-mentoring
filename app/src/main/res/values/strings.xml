@@ -35,7 +35,10 @@
     <string name="home_page">home page</string>
     <string name="menu_home">Home</string>
     <string name="menu_schedules">Schedules</string>
-    <string name="schedules_page">schedules page</string>
     <string name="menu_mentorship">Mentorship</string>
-    <string name="mentorship_schedules_page">mentorship schedules page</string>
+    <string name="mentorship_page">mentorship page</string>
+    <string name="chat_menu">Chat</string>
+    <string name="chat_page">Chat Page</string>
+    <string name="menu_my_profile">My Profile</string>
+    <string name="my_profile_page">my profile page</string>
 </resources>

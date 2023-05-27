@@ -1,5 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -9,7 +10,7 @@ import dev.cisnux.dicodingmentoring.domain.models.AuthUser
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,7 +21,7 @@ class LoginViewModel @Inject constructor(
     val currentUserId get() = repository.currentUser()?.uid
     val getGoogleIntent get() = repository.getGoogleIntent()
     private val _loginState = MutableStateFlow<UiState<String?>>(UiState.Initialize)
-    val loginState: StateFlow<UiState<String?>> get() = _loginState
+    val loginState get() = _loginState.asStateFlow()
 
     private val _email = mutableStateOf("")
     val email: State<String> get() = _email
@@ -42,7 +43,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun googleSignIn(token: String?) = viewModelScope.launch {
-        _loginState.value = UiState.Loading
+        _loginState.value = UiState.Initialize
         val result = repository.signInWithGoogle(token)
         result.fold(
             {
@@ -54,6 +55,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun saveAuthSession(id: String, session: Boolean) = viewModelScope.launch {
+        Log.d(LoginViewModel::class.simpleName, repository.currentUser()?.toString() ?: "no user")
         repository.saveAuthSession(id, session)
     }
 

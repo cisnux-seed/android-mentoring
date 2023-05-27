@@ -1,6 +1,5 @@
 package dev.cisnux.dicodingmentoring.ui.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -13,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
+import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileScreen
 import dev.cisnux.dicodingmentoring.ui.register.RegisterScreen
 import dev.cisnux.dicodingmentoring.ui.registerprofile.RegisterProfileScreen
 import dev.cisnux.dicodingmentoring.ui.resetpassword.ResetPasswordScreen
@@ -23,16 +23,13 @@ fun AppNavGraph(
     modifier: Modifier = Modifier,
     viewModel: NavigationViewModel = hiltViewModel()
 ) {
-    val authSession by viewModel.authSession.collectAsStateWithLifecycle()
-    Log.d("AppNavGraph", authSession.toString())
+    val authSession by
+            viewModel.authSession.collectAsStateWithLifecycle()
 
     authSession?.let { isSessionExist ->
-        val startDestination =
-            if (isSessionExist) AppDestinations.HOME_ROUTE
-            else {
-                viewModel.cancelPrevSession()
-                AppDestinations.LOGIN_ROUTE
-            }
+        val startDestination = if (isSessionExist) AppDestinations.HOME_ROUTE
+        else AppDestinations.LOGIN_ROUTE
+
         NavHost(
             navController = navController,
             startDestination = startDestination,
@@ -74,7 +71,12 @@ fun AppNavGraph(
                 )
             }
             composable(
-                route = AppDestinations.PROFILE_ROUTE,
+                route = AppDestinations.MY_PROFILE_ROUTE
+            ) {
+                MyProfileScreen()
+            }
+            composable(
+                route = AppDestinations.REGISTER_PROFILE_ROUTE,
                 arguments = listOf(navArgument("id") {
                     type = NavType.StringType
                 })

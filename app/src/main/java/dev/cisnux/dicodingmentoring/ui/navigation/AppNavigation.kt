@@ -11,7 +11,8 @@ object AppDestinations {
     const val REGISTER_ROUTE = "register"
     const val RESET_PASSWORD = "resetpassword"
     const val HOME_ROUTE = "home"
-    const val PROFILE_ROUTE = "profile/{id}"
+    const val REGISTER_PROFILE_ROUTE = "profile/{id}"
+    const val MY_PROFILE_ROUTE = "myprofile"
 }
 
 class AppNavigationActions(

@@ -77,6 +77,7 @@ class UserProfileRepositoryImpl @Inject constructor(
                         it
                     )
                 }
+                Log.d(UserProfileRepositoryImpl::class.simpleName, "UserProfile")
                 remoteDataSource.postUserProfile(
                     id,
                     imageMultipart,

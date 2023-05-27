@@ -55,7 +55,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalComposeUiApi::class)
 @Preview
 @Composable
-fun LoginBodyPreview() {
+fun LoginContentPreview() {
     DicodingMentoringTheme {
         Surface(
             modifier = Modifier.fillMaxSize(),
@@ -70,7 +70,7 @@ fun LoginBodyPreview() {
             }
             val context = LocalContext.current
 
-            LoginBody(
+            LoginContent(
                 email = email,
                 password = password,
                 onEmailQueryChanged = {},
@@ -147,7 +147,7 @@ fun LoginScreen(
             SnackbarHost(hostState = snackbarHostState)
         }
     ) { innerPadding ->
-        LoginBody(
+        LoginContent(
             email = email,
             password = password,
             onEmailQueryChanged = viewModel::onEmailQueryChanged,
@@ -169,7 +169,7 @@ fun LoginScreen(
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun LoginBody(
+fun LoginContent(
     email: String,
     password: String,
     onEmailQueryChanged: (email: String) -> Unit,

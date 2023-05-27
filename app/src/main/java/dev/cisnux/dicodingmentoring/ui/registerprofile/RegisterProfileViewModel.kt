@@ -14,7 +14,6 @@ import dev.cisnux.dicodingmentoring.utils.UiState
 import dev.cisnux.dicodingmentoring.utils.isValidAbout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -42,6 +41,14 @@ class RegisterProfileViewModel @Inject constructor(
 
     private val checkedInterests = mutableListOf<String>()
     val isCheckedEmpty get() = checkedInterests.isEmpty()
+
+
+    init {
+        Log.d(
+            RegisterProfileViewModel::class.simpleName,
+            authRepository.currentUser()?.toString() ?: "no user"
+        )
+    }
 
     fun addInterest(interest: String, checked: Boolean) {
         if (checked) checkedInterests.add(interest)

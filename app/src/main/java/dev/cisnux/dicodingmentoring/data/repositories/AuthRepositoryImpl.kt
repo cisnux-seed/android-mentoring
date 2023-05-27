@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.data.repositories
 
 import android.content.Intent
+import android.util.Log
 import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth
@@ -100,6 +101,8 @@ class AuthRepositoryImpl @Inject constructor(
             try {
                 val credential = GoogleAuthProvider.getCredential(token, null)
                 val authResult = firebaseAuth.signInWithCredential(credential).await()
+                Log.d(AuthRepositoryImpl::class.simpleName, authResult.user?.email?:"no id1")
+                Log.d(AuthRepositoryImpl::class.simpleName, firebaseAuth.currentUser?.email?:"no id2")
                 authResult.user?.let {
                     userProfileRemoteDataSource.getUserProfileById(it.uid)
                 }
