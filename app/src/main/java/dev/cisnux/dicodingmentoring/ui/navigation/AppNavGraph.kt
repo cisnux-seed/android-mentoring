@@ -1,5 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.navigation
 
+import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -10,9 +11,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import dev.cisnux.dicodingmentoring.ui.MainViewModel
+import dev.cisnux.dicodingmentoring.ui.addmentor.AddMentorScreen
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
 import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileScreen
+import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileViewModel
 import dev.cisnux.dicodingmentoring.ui.register.RegisterScreen
 import dev.cisnux.dicodingmentoring.ui.registerprofile.RegisterProfileScreen
 import dev.cisnux.dicodingmentoring.ui.resetpassword.ResetPasswordScreen
@@ -20,11 +24,12 @@ import dev.cisnux.dicodingmentoring.ui.resetpassword.ResetPasswordScreen
 @Composable
 fun AppNavGraph(
     navController: NavHostController,
+    navigationActions: AppNavigationActions,
+    mainViewModel: MainViewModel,
+    drawerState: DrawerState,
     modifier: Modifier = Modifier,
-    viewModel: NavigationViewModel = hiltViewModel()
 ) {
-    val authSession by
-            viewModel.authSession.collectAsStateWithLifecycle()
+    val authSession by mainViewModel.authSession.collectAsStateWithLifecycle()
 
     authSession?.let { isSessionExist ->
         val startDestination = if (isSessionExist) AppDestinations.HOME_ROUTE
@@ -35,8 +40,7 @@ fun AppNavGraph(
             startDestination = startDestination,
             modifier = modifier
         ) {
-            val navigationActions =
-                AppNavigationActions(navController)
+
             composable(
                 route = AppDestinations.LOGIN_ROUTE,
             ) {
@@ -44,7 +48,7 @@ fun AppNavGraph(
                     navigateToHome = navigationActions.navigateToHome,
                     navigateToRegister = navigationActions.navigateToRegister,
                     navigateToResetPassword = navigationActions.navigateToResetPassword,
-                    navigateToRegisterProfile = navigationActions.navigateToRegisterProfile
+                    navigateToRegisterProfile = navigationActions.navigateToRegisterProfile,
                 )
             }
             composable(
@@ -52,28 +56,42 @@ fun AppNavGraph(
             ) {
                 RegisterScreen(
                     navigateToRegisterProfile = navigationActions.navigateToRegisterProfile,
-                    navigateToLogin = navigationActions.navigateUp
+                    navigateToLogin = navigationActions.navigateUp,
                 )
             }
             composable(
-                route = AppDestinations.RESET_PASSWORD,
+                route = AppDestinations.RESET_PASSWORD_ROUTE,
             ) {
                 ResetPasswordScreen(
-                    navigateToSignIn = navigationActions.navigateUp
+                    navigateToSignIn = navigationActions.navigateUp,
                 )
             }
             composable(
                 route = AppDestinations.HOME_ROUTE
             ) {
                 HomeScreen(
-                    navigateToLogin = navigationActions.navigateToLogin,
-                    navigateToRegisterProfile = navigationActions.navigateToRegisterProfile
+                    mainViewModel = mainViewModel,
+                    drawerState = drawerState
                 )
             }
             composable(
                 route = AppDestinations.MY_PROFILE_ROUTE
             ) {
-                MyProfileScreen()
+                MyProfileScreen(
+                    navigateToAddMentor = navigationActions.navigateToAddMentor,
+                    mainViewModel = mainViewModel,
+                )
+            }
+            composable(
+                route = AppDestinations.ADD_MENTOR_ROUTE,
+                arguments = listOf(navArgument("id") {
+                    type = NavType.StringType
+                })
+            ) {
+                AddMentorScreen(
+                    navigateToMyProfile = navigationActions.navigateToMyProfile,
+                    mainViewModel = mainViewModel,
+                )
             }
             composable(
                 route = AppDestinations.REGISTER_PROFILE_ROUTE,
@@ -86,7 +104,7 @@ fun AppNavGraph(
                     RegisterProfileScreen(
                         id = uid,
                         onNavigateToHome = navigationActions.navigateToHome,
-                        takePictureFromGallery = navigationActions.takePictureFromGallery
+                        takePictureFromGallery = navigationActions.takePictureFromGallery,
                     )
                 }
             }

@@ -8,23 +8,21 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 import retrofit2.http.Path
 
-interface UserProfileService {
+interface MenteeService {
     @Multipart
-    @POST("profile/{id}")
-    suspend fun postUserProfile(
+    @POST("mentees/{id}")
+    suspend fun postMenteeProfile(
         @Path("id") id: String,
         @Part photoProfile: MultipartBody.Part?,
         @Part("fullName") fullName: RequestBody,
         @Part("username") username: RequestBody,
         @Part("email") email: RequestBody,
         @Part("job") job: RequestBody,
-        @Part("interests") interests: RequestBody,
-        @Part("experienceLevel") experienceLevel: RequestBody,
         @Part("about") about: RequestBody,
     )
 
-    @GET("profile/{id}")
-    suspend fun getUserProfilesById(
+    @GET("mentees/{id}")
+    suspend fun getMenteeProfileById(
         @Path("id") id: String,
-    ): UserProfileResponse
+    ): MenteeResponse
 }

@@ -12,14 +12,13 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,7 +63,6 @@ fun AuthFormPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AuthForm(
     email: String,
@@ -94,6 +92,7 @@ fun AuthForm(
             onValueChange = onEmailQueryChanged,
             modifier = Modifier
                 .fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             leadingIcon = {
                 Icon(
                     tint = MaterialTheme.colorScheme.primary,
@@ -107,10 +106,10 @@ fun AuthForm(
                 if (email.isNotEmpty() && !email.isEmail())
                     Text(text = stringResource(R.string.invalid_email_message))
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                disabledBorderColor = MaterialTheme.colorScheme.primary
+                disabledBorderColor = MaterialTheme.colorScheme.primary,
             ),
             label = {
                 Text(text = stringResource(R.string.email_hint))
@@ -157,10 +156,10 @@ fun AuthForm(
                     )
                 }
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                disabledBorderColor = MaterialTheme.colorScheme.primary
+                disabledBorderColor = MaterialTheme.colorScheme.primary,
             ),
             isError = password.isNotEmpty() && !password.isPasswordSecure()
         )

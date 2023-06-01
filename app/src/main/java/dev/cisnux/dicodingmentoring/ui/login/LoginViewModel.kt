@@ -9,8 +9,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.domain.models.AuthUser
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,7 +20,9 @@ import javax.inject.Inject
 class LoginViewModel @Inject constructor(
     private val repository: AuthRepository,
 ) : ViewModel() {
-    val currentUserId get() = repository.currentUser()?.uid
+    val currentUserId get() = repository.currentUser().map {
+        it.uid
+    }
     val getGoogleIntent get() = repository.getGoogleIntent()
     private val _loginState = MutableStateFlow<UiState<String?>>(UiState.Initialize)
     val loginState get() = _loginState.asStateFlow()
@@ -29,20 +33,24 @@ class LoginViewModel @Inject constructor(
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
+
     fun loginWithEmailAndPassword() = viewModelScope.launch {
         _loginState.value = UiState.Loading
         val authUser = AuthUser(email = _email.value, password = _password.value)
         val result = repository.signInWithEmailAndPassword(authUser)
         result.fold(
             {
+                Log.d("LoginViewModel", it.message ?: "no message")
                 _loginState.value = UiState.Error(it)
-            }, {
+            },
+            {
                 _loginState.value = UiState.Success(it)
             }
         )
     }
 
     fun googleSignIn(token: String?) = viewModelScope.launch {
+        Log.d("Google sign in", "login")
         _loginState.value = UiState.Initialize
         val result = repository.signInWithGoogle(token)
         result.fold(
@@ -55,8 +63,8 @@ class LoginViewModel @Inject constructor(
     }
 
     fun saveAuthSession(id: String, session: Boolean) = viewModelScope.launch {
-        Log.d(LoginViewModel::class.simpleName, repository.currentUser()?.toString() ?: "no user")
         repository.saveAuthSession(id, session)
+        delay(500L)
     }
 
     fun onEmailQueryChanged(email: String) {

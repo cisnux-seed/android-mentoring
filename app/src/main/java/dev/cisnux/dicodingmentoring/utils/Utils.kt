@@ -9,4 +9,6 @@ fun String.isEmail(): Boolean {
 
 fun String.isPasswordSecure(): Boolean = this.trim().length >= 8
 
-fun String.isValidAbout(maxLength: Int) = length <= 80
+fun String.isValidAbout(maxLength: Int) = length <= maxLength
+
+fun String.asList() = replace("[^\\S\r\n]+".toRegex(), "").split("\n")

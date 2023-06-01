@@ -10,11 +10,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-abstract class UserProfileLocalDataSourceModule {
+abstract class AuthLocalDataSourceModule {
 
     @Singleton
     @Binds
-    abstract fun bindUserProfileLocalDataSource(
-        userProfileLocalDataSourceImpl: AuthLocalDataSourceImpl
+    abstract fun bindAuthLocalDataSource(
+        authLocalDataSourceImpl: AuthLocalDataSourceImpl
     ): AuthLocalDataSource
 }

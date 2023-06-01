@@ -1,7 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.registerprofile
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -14,6 +13,7 @@ import dev.cisnux.dicodingmentoring.utils.UiState
 import dev.cisnux.dicodingmentoring.utils.isValidAbout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -27,9 +27,8 @@ class RegisterProfileViewModel @Inject constructor(
     private val _username = mutableStateOf("")
     val username: State<String> get() = _username
     private val _job = mutableStateOf("")
+    private var email: String? = null
     val job: State<String> get() = _job
-    private val _experienceLevel = mutableStateOf("")
-    val experienceLevel: State<String> get() = _experienceLevel
     private var _about = mutableStateOf("")
     val about: State<String> get() = _about
 
@@ -39,23 +38,12 @@ class RegisterProfileViewModel @Inject constructor(
     private val _pictureFromGallery = mutableStateOf<Uri?>(null)
     val pictureFromGallery: State<Uri?> get() = _pictureFromGallery
 
-    private val checkedInterests = mutableListOf<String>()
-    val isCheckedEmpty get() = checkedInterests.isEmpty()
-
-
     init {
-        Log.d(
-            RegisterProfileViewModel::class.simpleName,
-            authRepository.currentUser()?.toString() ?: "no user"
-        )
-    }
-
-    fun addInterest(interest: String, checked: Boolean) {
-        if (checked) checkedInterests.add(interest)
-        else checkedInterests.remove(
-            interest
-        )
-        Log.d(RegisterProfileViewModel::class.simpleName, checkedInterests.toString())
+        viewModelScope.launch {
+            authRepository.currentUser().collectLatest {
+                email = it.email
+            }
+        }
     }
 
     fun setPhotoFromGallery(uri: Uri) {
@@ -74,13 +62,9 @@ class RegisterProfileViewModel @Inject constructor(
         _job.value = job
     }
 
-    fun onAboutQueryChanged(about: String) {
-        if (about.isValidAbout(80))
+    fun onAboutQueryChanged(about: String, maxAboutLength: Int) {
+        if (about.isValidAbout(maxAboutLength))
             _about.value = about
-    }
-
-    fun onExperienceLevelOption(experienceLevel: String) {
-        _experienceLevel.value = experienceLevel
     }
 
     fun saveAuthSession(id: String, session: Boolean) = viewModelScope.launch {
@@ -89,8 +73,6 @@ class RegisterProfileViewModel @Inject constructor(
 
     fun onCreateProfile(id: String) = viewModelScope.launch {
         _createProfileState.value = UiState.Loading
-        val email = authRepository.currentUser()?.email
-
         email?.let { userEmail ->
             val addUserProfile = AddUserProfile(
                 id = id,
@@ -98,17 +80,15 @@ class RegisterProfileViewModel @Inject constructor(
                 username = username.value,
                 email = userEmail,
                 job = job.value,
-                experienceLevel = experienceLevel.value,
-                interests = checkedInterests,
                 photoProfileUri = pictureFromGallery.value,
                 about = about.value
             )
-            userProfileRepo.postUserProfile(addUserProfile).fold(
-                {
-                    _createProfileState.value = UiState.Error(it)
+            userProfileRepo.addMenteeProfile(addUserProfile).fold(
+                { exception ->
+                    _createProfileState.value = UiState.Error(exception)
                 },
                 {
-                    _createProfileState.value = UiState.Success(it)
+                    _createProfileState.value = UiState.Success()
                 }
             )
         }

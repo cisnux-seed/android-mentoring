@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dev.cisnux.dicodingmentoring.domain.models.AuthenticatedUser
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
 import dev.cisnux.dicodingmentoring.utils.isEmail
@@ -19,8 +18,8 @@ import javax.inject.Inject
 class ResetPasswordViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
-    private val _resetPasswordState = MutableStateFlow<UiState<AuthenticatedUser>>(UiState.Loading)
-    val resetPasswordState: StateFlow<UiState<AuthenticatedUser>> get() = _resetPasswordState
+    private val _resetPasswordState = MutableStateFlow<UiState<Nothing>>(UiState.Loading)
+    val resetPasswordState: StateFlow<UiState<Nothing>> get() = _resetPasswordState
 
     private val _email = mutableStateOf("")
     val email: State<String> get() = _email
@@ -40,7 +39,7 @@ class ResetPasswordViewModel @Inject constructor(
             {
                 _resetPasswordState.value = UiState.Error(it)
             }, {
-                _resetPasswordState.value = UiState.Success(it)
+                _resetPasswordState.value = UiState.Success()
             }
         )
     }

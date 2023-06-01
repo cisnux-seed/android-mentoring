@@ -8,8 +8,6 @@ data class AddUserProfile(
     val username: String,
     val email: String,
     val job: String,
-    val experienceLevel: String,
-    val interests: List<String>,
     val photoProfileUri: Uri? = null,
     val about: String,
 )

@@ -6,9 +6,8 @@ data class GetUserProfile(
     val username: String,
     val email: String,
     val job: String,
-    val experienceLevel: String,
-    val interests: List<String>,
-    val isMentor: Boolean,
+    val isMentorValid: Boolean,
     val about: String,
     val photoProfileUrl: String? = null,
+    val expertises: List<Expertise>
 )

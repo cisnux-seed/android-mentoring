@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.domain.models.AuthUser
-import dev.cisnux.dicodingmentoring.domain.models.AuthenticatedUser
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +17,8 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val repository: AuthRepository
 ) : ViewModel() {
-    private val _registerState = MutableStateFlow<UiState<AuthenticatedUser>>(UiState.Initialize)
-    val registerState: StateFlow<UiState<AuthenticatedUser>> get() = _registerState
+    private val _registerState = MutableStateFlow<UiState<String?>>(UiState.Initialize)
+    val registerState: StateFlow<UiState<String?>> get() = _registerState
 
     private val _email = mutableStateOf("")
     val email: State<String> get() = _email

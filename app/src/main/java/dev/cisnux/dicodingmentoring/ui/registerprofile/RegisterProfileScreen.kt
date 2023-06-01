@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.compose.foundation.Image
@@ -27,27 +26,20 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -58,8 +50,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -75,7 +65,7 @@ import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterProfileScreen(
     id: String,
@@ -87,7 +77,6 @@ fun RegisterProfileScreen(
     val fullName by viewModel.fullName
     val username by viewModel.username
     val job by viewModel.job
-    val experienceLevel by viewModel.experienceLevel
     val about by viewModel.about
     val pictureFromGallery by viewModel.pictureFromGallery
 
@@ -99,9 +88,9 @@ fun RegisterProfileScreen(
     val snackbarHostState = remember {
         SnackbarHostState()
     }
+    val maxAboutLength = 160
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
-    var checkBoxState by rememberInterestsCheckBoxState()
 
     val createProfileState by viewModel.createProfileState.collectAsStateWithLifecycle()
     when (createProfileState) {
@@ -133,13 +122,13 @@ fun RegisterProfileScreen(
                 viewModel.onCreateProfile(id)
             },
             onProfilePicture = { takePictureFromGallery(launcher) },
-            onExperienceLevelOption = viewModel::onExperienceLevelOption,
-            experienceLevelOption = experienceLevel,
             about = about,
             onFullNameQueryChanged = viewModel::onFullNameQueryChanged,
             onUsernameQueryChanged = viewModel::onUsernameQueryChanged,
             onJobQueryChanged = viewModel::onJobQueryChanged,
-            onAboutQueryChanged = viewModel::onAboutQueryChanged,
+            onAboutQueryChanged = {
+                viewModel.onAboutQueryChanged(it, maxAboutLength)
+            },
             snackbarHostState = snackbarHostState,
             scope = coroutineScope,
             context = context,
@@ -148,73 +137,7 @@ fun RegisterProfileScreen(
             modifier = Modifier.padding(innerPadding),
             imageUri = pictureFromGallery,
             isLoading = createProfileState is UiState.Loading,
-            isCheckedEmpty = viewModel.isCheckedEmpty,
-            checkedParentState = checkBoxState.parentState,
-            checkBoxItems = listOf(
-                CheckBoxItem(title = stringResource(id = R.string.android),
-                    checked = checkBoxState.checkBox1State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox1State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-                CheckBoxItem(title = stringResource(id = R.string.ios),
-                    checked = checkBoxState.checkBox2State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox2State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-                CheckBoxItem(title = stringResource(id = R.string.frontend),
-                    checked = checkBoxState.checkBox3State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox3State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-                CheckBoxItem(title = stringResource(id = R.string.backend),
-                    checked = checkBoxState.checkBox4State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox4State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-                CheckBoxItem(title = stringResource(id = R.string.cloud_computing),
-                    checked = checkBoxState.checkBox5State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox5State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-                CheckBoxItem(title = stringResource(id = R.string.machine_learning),
-                    checked = checkBoxState.checkBox6State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox6State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-                CheckBoxItem(title = stringResource(id = R.string.ui_ux),
-                    checked = checkBoxState.checkBox7State,
-                    onCheckedChange = { checked, title ->
-                        checkBoxState = checkBoxState.copy(
-                            checkBox7State = checked
-                        )
-                        viewModel.addInterest(checked = checked, interest = title)
-                    }),
-            ),
-            options = listOf(
-                stringResource(R.string.beginner),
-                stringResource(R.string.intermediate),
-                stringResource(
-                    R.string.expert
-                )
-            )
+            aboutMaxLength = maxAboutLength
         )
     }
 
@@ -234,7 +157,6 @@ fun RegisterProfileContentPreview() {
                 fullName = "",
                 username = "",
                 job = "",
-                experienceLevelOption = "",
                 about = "",
                 onFullNameQueryChanged = {},
                 onUsernameQueryChanged = {},
@@ -246,61 +168,15 @@ fun RegisterProfileContentPreview() {
                 snackbarHostState = SnackbarHostState(),
                 scope = rememberCoroutineScope(),
                 onProfilePicture = {},
-                onExperienceLevelOption = {},
                 scrollState = rememberScrollState(),
                 isLoading = true,
-                isCheckedEmpty = false,
-                checkedParentState = ToggleableState.On,
-                checkBoxItems = listOf(
-                    CheckBoxItem(title = stringResource(id = R.string.android),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                    CheckBoxItem(title = stringResource(id = R.string.ios),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                    CheckBoxItem(title = stringResource(id = R.string.frontend),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                    CheckBoxItem(title = stringResource(id = R.string.backend),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                    CheckBoxItem(title = stringResource(id = R.string.cloud_computing),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                    CheckBoxItem(title = stringResource(id = R.string.machine_learning),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                    CheckBoxItem(title = stringResource(id = R.string.ui_ux),
-                        checked = true,
-                        onCheckedChange = { _, _ ->
-
-                        }),
-                ),
-                options = listOf(
-                    stringResource(R.string.beginner),
-                    stringResource(R.string.intermediate),
-                    stringResource(
-                        R.string.expert
-                    )
-                )
+                aboutMaxLength = 160,
             )
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun RegisterProfileContent(
     fullName: String,
@@ -308,12 +184,8 @@ fun RegisterProfileContent(
     job: String,
     onCreateProfile: () -> Unit,
     onProfilePicture: () -> Unit,
-    onExperienceLevelOption: (String) -> Unit,
-    experienceLevelOption: String,
     about: String,
-    options: List<String>,
     isLoading: Boolean,
-    checkedParentState: ToggleableState,
     onFullNameQueryChanged: (String) -> Unit,
     onUsernameQueryChanged: (String) -> Unit,
     onJobQueryChanged: (String) -> Unit,
@@ -323,15 +195,10 @@ fun RegisterProfileContent(
     context: Context,
     scrollState: ScrollState,
     keyboardController: SoftwareKeyboardController?,
-    isCheckedEmpty: Boolean,
-    checkBoxItems: List<CheckBoxItem>,
+    aboutMaxLength:Int,
     modifier: Modifier = Modifier,
     imageUri: Uri? = null,
 ) {
-    var isExpanded by remember {
-        mutableStateOf(false)
-    }
-
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -393,7 +260,7 @@ fun RegisterProfileContent(
             placeholder = {
                 Text(text = "Enter your full name")
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
                 disabledBorderColor = MaterialTheme.colorScheme.primary,
@@ -414,12 +281,13 @@ fun RegisterProfileContent(
                 )
             },
             supportingText = {
-                if (username.isNotEmpty() && username.isBlank()) Text(text = "Please enter your username")
+                if (username.isNotEmpty() && username.isBlank())
+                    Text(text = "Please enter your username")
             },
             placeholder = {
                 Text(text = "Enter your username")
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
                 disabledBorderColor = MaterialTheme.colorScheme.primary,
@@ -431,7 +299,7 @@ fun RegisterProfileContent(
             value = job,
             onValueChange = onJobQueryChanged,
             modifier = Modifier.fillMaxWidth(),
-            maxLines = 1,
+            maxLines = 2,
             leadingIcon = {
                 Icon(
                     tint = MaterialTheme.colorScheme.primary,
@@ -445,64 +313,13 @@ fun RegisterProfileContent(
             placeholder = {
                 Text(text = "Enter your job")
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
                 disabledBorderColor = MaterialTheme.colorScheme.primary,
             ),
             isError = job.isNotEmpty() && job.isBlank()
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        ExposedDropdownMenuBox(expanded = isExpanded, onExpandedChange = {
-            isExpanded = it
-        }) {
-            OutlinedTextField(
-                value = experienceLevelOption,
-                onValueChange = {},
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth(),
-                maxLines = 1,
-                readOnly = true,
-                leadingIcon = {
-                    Icon(
-                        tint = MaterialTheme.colorScheme.primary,
-                        painter = painterResource(id = R.drawable.ic_xp_24),
-                        contentDescription = null,
-                        modifier = Modifier.size(28.dp)
-                    )
-                },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
-                supportingText = {
-                    if (experienceLevelOption.isNotEmpty() && experienceLevelOption.isBlank()) Text(
-                        text = "Please enter your experience level"
-                    )
-                },
-                placeholder = {
-                    Text(text = "Enter your experience level")
-                },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.primary,
-                    disabledBorderColor = MaterialTheme.colorScheme.primary,
-                ),
-                isError = experienceLevelOption.isNotEmpty() && experienceLevelOption.isBlank()
-            )
-            ExposedDropdownMenu(expanded = isExpanded, onDismissRequest = {
-                isExpanded = false
-            }) {
-                options.forEach { selectionOption ->
-                    DropdownMenuItem(
-                        text = { Text(selectionOption) },
-                        onClick = {
-                            onExperienceLevelOption(selectionOption)
-                            isExpanded = false
-                        },
-                        contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-                    )
-                }
-            }
-        }
         Spacer(modifier = Modifier.height(8.dp))
         OutlinedTextField(
             value = about,
@@ -511,37 +328,20 @@ fun RegisterProfileContent(
             placeholder = {
                 Text(text = "Tell us us more about yourself")
             },
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.primary,
                 disabledBorderColor = MaterialTheme.colorScheme.primary,
             ),
             supportingText = {
                 Text(
-                    text = "${about.length} / 80",
+                    text = "${about.length} / $aboutMaxLength",
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.End,
                 )
             }
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
-        ) {
-            TriStateCheckbox(state = checkedParentState, onClick = {
-                val state = checkedParentState != ToggleableState.On
-                // check all checkboxes
-                checkBoxItems.forEach {
-                    it.onCheckedChange(state, it.title)
-                }
-            })
-            Spacer(modifier = Modifier.width(2.dp))
-            Text(
-                text = "Interests"
-            )
-        }
-        GridCheckBoxInterest(count = 2, checkBoxes = checkBoxItems)
-        Spacer(modifier = Modifier.height(16.dp))
         Button(
             onClick = {
                 if (fullName.isBlank()) {
@@ -562,22 +362,9 @@ fun RegisterProfileContent(
                     }
                     return@Button
                 }
-                if (experienceLevelOption.isBlank()) {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_experience_message))
-                    }
-                    return@Button
-                }
                 if (about.isBlank()) {
                     scope.launch {
                         snackbarHostState.showSnackbar(message = context.getString(R.string.invalid_about_message))
-                    }
-                    return@Button
-                }
-                Log.d("RegisterProfileScree", isCheckedEmpty.toString())
-                if (isCheckedEmpty) {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(message = "you must select at least one of the interests")
                     }
                     return@Button
                 }

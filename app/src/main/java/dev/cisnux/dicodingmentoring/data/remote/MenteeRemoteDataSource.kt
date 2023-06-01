@@ -1,20 +1,18 @@
 package dev.cisnux.dicodingmentoring.data.remote
 
-import dev.cisnux.dicodingmentoring.data.services.UserProfileResponse
+import dev.cisnux.dicodingmentoring.data.services.MenteeResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 
-interface UserProfileRemoteDataSource {
-    suspend fun getUserProfileById(id: String): UserProfileResponse
-    suspend fun postUserProfile(
+interface MenteeRemoteDataSource {
+    suspend fun getMenteeProfileById(id: String): MenteeResponse
+    suspend fun postMenteeProfile(
         id: String,
         photoProfile: MultipartBody.Part?,
         fullName: RequestBody,
         username: RequestBody,
         email: RequestBody,
         job: RequestBody,
-        interests: RequestBody,
-        experienceLevel: RequestBody,
         about: RequestBody,
     )
 }

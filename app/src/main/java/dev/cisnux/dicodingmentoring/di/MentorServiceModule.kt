@@ -4,7 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import dev.cisnux.dicodingmentoring.data.services.UserProfileService
+import dev.cisnux.dicodingmentoring.data.services.MentorService
 import dev.cisnux.dicodingmentoring.utils.BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -13,19 +13,19 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object UserProfileServiceModule {
+object MentorServiceModule {
 
     @Singleton
     @Provides
-    fun provideUserProfileService(
+    fun provideMentorService(
         client: OkHttpClient,
         moshiConverter: MoshiConverterFactory,
-    ): UserProfileService {
+    ): MentorService {
         return Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(moshiConverter)
             .client(client)
             .build()
-            .create(UserProfileService::class.java)
+            .create(MentorService::class.java)
     }
 }

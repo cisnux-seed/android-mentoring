@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -23,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -90,7 +91,7 @@ fun LoginContentPreview() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
@@ -102,6 +103,7 @@ fun LoginScreen(
 ) {
     val email by viewModel.email
     val password by viewModel.password
+    val currentUserId by viewModel.currentUserId.collectAsState(null)
 
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember {
@@ -120,8 +122,8 @@ fun LoginScreen(
 
     when (loginState) {
         is UiState.Success -> {
-            viewModel.currentUserId?.let { id ->
-                viewModel.saveAuthSession(id, true)
+            (loginState as UiState.Success).data?.let {
+                viewModel.saveAuthSession(it, true)
             }
             navigateToHome()
         }
@@ -129,7 +131,8 @@ fun LoginScreen(
         is UiState.Error -> {
             (loginState as UiState.Error).error?.let { exception ->
                 if (exception is Failure.NotFoundFailure) {
-                    viewModel.currentUserId?.let(navigateToRegisterProfile)
+                    Log.d("LoginScreen", currentUserId ?: "no id")
+                    currentUserId?.let(navigateToRegisterProfile)
                 } else {
                     LaunchedEffect(snackbarHostState) {
                         exception.message?.let { snackbarHostState.showSnackbar(it) }

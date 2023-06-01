@@ -54,7 +54,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ResetPasswordScreen(
     navigateToSignIn: () -> Unit,
