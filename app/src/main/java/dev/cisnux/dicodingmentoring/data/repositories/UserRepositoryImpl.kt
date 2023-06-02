@@ -7,11 +7,13 @@ import dev.cisnux.dicodingmentoring.data.services.ExpertisesItem
 import dev.cisnux.dicodingmentoring.data.services.FileService
 import dev.cisnux.dicodingmentoring.data.services.MentorRequestBody
 import dev.cisnux.dicodingmentoring.data.services.asExpertises
+import dev.cisnux.dicodingmentoring.data.services.asGetMentors
 import dev.cisnux.dicodingmentoring.domain.models.AddMentor
 import dev.cisnux.dicodingmentoring.domain.models.AddUserProfile
+import dev.cisnux.dicodingmentoring.domain.models.GetMentor
 import dev.cisnux.dicodingmentoring.domain.models.GetUserProfile
 import dev.cisnux.dicodingmentoring.domain.models.asExpertiseItems
-import dev.cisnux.dicodingmentoring.domain.repositories.UserProfileRepository
+import dev.cisnux.dicodingmentoring.domain.repositories.UserRepository
 import dev.cisnux.dicodingmentoring.utils.Failure
 import dev.cisnux.dicodingmentoring.utils.HTTP_FAILURES
 import kotlinx.coroutines.Dispatchers
@@ -25,12 +27,11 @@ import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class UserProfileRepositoryImpl @Inject constructor(
+class UserRepositoryImpl @Inject constructor(
     private val menteeRemoteDataSource: MenteeRemoteDataSource,
     private val fileService: FileService,
     private val mentorRemoteDataSource: MentorRemoteDataSource
-) : UserProfileRepository {
-
+) : UserRepository {
     override suspend fun getUserProfileById(id: String): Either<Exception, GetUserProfile> =
         withContext(Dispatchers.IO) {
             try {
@@ -123,6 +124,33 @@ class UserProfileRepositoryImpl @Inject constructor(
                 )
                 mentorRemoteDataSource.addMentorProfile(addMentor.id, mentorRequestBody)
                 Either.Right(null)
+            } catch (e: IOException) {
+                Either.Left(Failure.ConnectionFailure("No internet connection"))
+            } catch (e: HttpException) {
+                val statusCode = e.response()?.code()
+                val failure = HTTP_FAILURES[statusCode]
+                val errorBody = e.response()?.errorBody()?.string()
+                errorBody?.let {
+                    failure?.message = JSONObject(it).getString("message")
+                }
+                Either.Left(failure ?: e)
+            } catch (e: Exception) {
+                Either.Left(e)
+            }
+        }
+
+    override suspend fun getMentors(
+        id: String,
+        keyword: String?
+    ): Either<Exception, List<GetMentor>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val mentors = mentorRemoteDataSource
+                    .getMentors(id, keyword)
+                    .mentorListData
+                    .mentors
+                    .asGetMentors()
+                Either.Right(mentors)
             } catch (e: IOException) {
                 Either.Left(Failure.ConnectionFailure("No internet connection"))
             } catch (e: HttpException) {

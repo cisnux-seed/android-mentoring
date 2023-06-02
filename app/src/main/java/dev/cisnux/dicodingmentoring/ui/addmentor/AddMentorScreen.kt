@@ -85,12 +85,13 @@ fun AddMentorScreen(
             R.string.expert
         )
     )
+    val maxFormSize = addMentorViewModel.maxFormSize
     val learningPathOptions = addMentorViewModel.learningPathOptions
     val addMentorState by addMentorViewModel.addMentorState
 
     if (addMentorState is UiState.Success) {
         navigateToMyProfile()
-        mainViewModel.refreshPrevContent(true)
+        mainViewModel.refreshMyProfileContent(true)
     }
 
     if (addMentorState is UiState.Error) {
@@ -116,7 +117,7 @@ fun AddMentorScreen(
                 onLearningPathOption = addMentorViewModel::onLearningPathOption,
                 onSkillChanged = addMentorViewModel::onSkillChanged,
                 onCertificateUrlChanged = addMentorViewModel::onCertificateUrlChanged,
-                maxFormSize = learningPathOptions.size + 1,
+                maxFormSize = maxFormSize,
                 onExpandedLearningChanged = addMentorViewModel::onExpandedLearningChanged,
                 onExpandedLevelChanged = addMentorViewModel::onExpandedExperienceChanged,
                 onCloseLearning = addMentorViewModel::onCloseLearning,

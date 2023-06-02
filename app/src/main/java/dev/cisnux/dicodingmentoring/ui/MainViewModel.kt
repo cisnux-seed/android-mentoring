@@ -1,6 +1,5 @@
 package dev.cisnux.dicodingmentoring.ui
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,7 +9,6 @@ import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,20 +22,19 @@ class MainViewModel @Inject constructor(
 
     private val _shouldBottomBarOpen = mutableStateOf(false)
     val shouldBottomBarOpen: State<Boolean> get() = _shouldBottomBarOpen
-    private val _isRefreshPrevContent = mutableStateOf(false)
-    val isRefreshPrevContent: State<Boolean> get() = _isRefreshPrevContent
+    private val _isRefreshMyProfileContent = mutableStateOf(false)
+    val isRefreshMyProfileContent: State<Boolean> get() = _isRefreshMyProfileContent
 
     private var currentUserId = authRepository.currentUser().map {
         it.uid
     }
 
     fun updateBottomState(shouldBottomBarOpen: Boolean) {
-        Log.d("MainViewModel", shouldBottomBarOpen.toString())
         _shouldBottomBarOpen.value = shouldBottomBarOpen
     }
 
-    fun refreshPrevContent(refreshPrevContent: Boolean) {
-        _isRefreshPrevContent.value = refreshPrevContent
+    fun refreshMyProfileContent(refreshMyProfileContent: Boolean) {
+        _isRefreshMyProfileContent.value = refreshMyProfileContent
     }
 
     init {

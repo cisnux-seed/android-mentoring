@@ -15,7 +15,7 @@ import dev.cisnux.dicodingmentoring.DicodingMentoringApplication
 import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.domain.models.AddMentor
 import dev.cisnux.dicodingmentoring.domain.models.Expertise
-import dev.cisnux.dicodingmentoring.domain.repositories.UserProfileRepository
+import dev.cisnux.dicodingmentoring.domain.repositories.UserRepository
 import dev.cisnux.dicodingmentoring.utils.MentoringForm
 import dev.cisnux.dicodingmentoring.utils.UiState
 import dev.cisnux.dicodingmentoring.utils.asList
@@ -25,7 +25,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddMentorViewModel @Inject constructor(
     @ApplicationContext appContext: Context,
-    private val repository: UserProfileRepository,
+    private val repository: UserRepository,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(appContext as Application) {
     private val context = getApplication<DicodingMentoringApplication>()
@@ -41,6 +41,7 @@ class AddMentorViewModel @Inject constructor(
             context.getString(R.string.machine_learning),
             context.getString(R.string.ui_ux),
         )
+    val maxFormSize = _learningPathOptions.size + 1
     val learningPathOptions get() = _learningPathOptions
     private val _mentoringForms = mutableStateListOf(
         MentoringForm(

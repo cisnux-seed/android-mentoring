@@ -1,8 +1,20 @@
 package dev.cisnux.dicodingmentoring.ui.home
 
+import android.content.Context
 import android.content.res.Configuration
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
@@ -17,13 +29,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import dev.cisnux.dicodingmentoring.ui.components.SearchBarButton
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dev.cisnux.dicodingmentoring.R
+import dev.cisnux.dicodingmentoring.domain.models.GetMentor
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
+import dev.cisnux.dicodingmentoring.ui.components.MentorCard
+import dev.cisnux.dicodingmentoring.ui.components.SearchBarButton
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
+import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -32,20 +53,23 @@ fun HomeScreen(
     drawerState: DrawerState,
     mainViewModel: MainViewModel,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = hiltViewModel(),
+    homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         oneTimeUpdateState(true)
     }
     val snackbarHostState = remember {
         SnackbarHostState()
     }
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
-
+    val mentorsState by homeViewModel.mentorsState
+    val currentUser by homeViewModel.currentUser.collectAsStateWithLifecycle(null)
 
     HomeContent(
+        modifier = modifier,
         snackbarHostState = snackbarHostState,
         coroutineScope = coroutineScope,
         drawerState = drawerState,
@@ -60,9 +84,39 @@ fun HomeScreen(
             expanded = false
             mainViewModel.updateBottomState(true)
         },
-        modifier = modifier,
-        body = {
-            HomeBody()
+        body = { innerPadding ->
+            when (mentorsState) {
+                is UiState.Initialize -> currentUser?.uid?.let(homeViewModel::getMentors)
+                is UiState.Success -> {
+                    HomeBody(
+                        context = context,
+                        mentors = (mentorsState as UiState.Success<List<GetMentor>>).data!!,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                }
+
+                is UiState.Error -> {
+                    LaunchedEffect(snackbarHostState) {
+                        (mentorsState as UiState.Error).error?.message?.let { message ->
+                            snackbarHostState.showSnackbar(
+                                message
+                            )
+                        }
+                    }
+                }
+
+                is UiState.Loading -> {
+                    Column(
+                        modifier = Modifier
+                            .padding(innerPadding)
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            }
         },
     )
 }
@@ -94,8 +148,90 @@ fun HomeContentPreview() {
                 onCloseSearchBar = {
                     expanded = false
                 },
-                body = {
-                    HomeBody()
+                body = { innerPadding ->
+                    HomeBody(
+                        context = LocalContext.current,
+                        mentors = listOf(
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                            GetMentor(
+                                id = "1",
+                                fullName = "Eren Jaeger",
+                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                averageRating = 3.0,
+                                job = "Front-End Developer"
+                            ),
+                        ),
+                        modifier = Modifier.padding(innerPadding)
+                    )
                 }
             )
         }
@@ -145,11 +281,131 @@ fun HomeContent(
 fun HomeBodyPreview() {
     Surface {
         DicodingMentoringTheme {
-            HomeBody()
+            HomeBody(
+                context = LocalContext.current,
+                mentors = listOf(
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                    GetMentor(
+                        id = "1",
+                        fullName = "Eren Jaeger",
+                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        averageRating = 3.0,
+                        job = "Front-End Developer"
+                    ),
+                )
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeBodyPreviewWhenEmpty() {
+    Surface {
+        DicodingMentoringTheme {
+            HomeBody(
+                context = LocalContext.current,
+                mentors = emptyList()
+            )
         }
     }
 }
 
 @Composable
-fun HomeBody() {
+fun HomeBody(
+    mentors: List<GetMentor>,
+    context: Context,
+    modifier: Modifier = Modifier,
+) {
+    if (mentors.isEmpty()) {
+        Column(
+            modifier = modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.empty_mentors),
+                contentDescription = null,
+                modifier = Modifier.size(150.dp),
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = modifier,
+            contentPadding = PaddingValues(bottom = 16.dp, start = 16.dp, end = 16.dp),
+            content = {
+                items(mentors) { mentor ->
+                    MentorCard(
+                        fullName = mentor.fullName,
+                        photoProfile = mentor.photoProfileUrl,
+                        job = mentor.job,
+                        averageRating = mentor.averageRating,
+                        context = context,
+                        onClick = {}
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider(
+                        color = Color.Gray.copy(alpha = 0.6f),
+                        thickness = 0.5.dp,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        )
+    }
 }

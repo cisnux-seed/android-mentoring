@@ -16,6 +16,12 @@ interface MentorService {
     @GET("mentors/{id}")
     suspend fun getMentorProfileById(
         @Path("id") id: String,
-        @Query("learningPath") learningPath: String? = null
-    ): MentorResponse
+    ): MentorDetailResponse
+
+
+    @GET("mentors/list/{id}")
+    suspend fun getMentors(
+        @Path("id") id: String,
+        @Query("keyword") keyword: String?,
+    ): MentorListResponse
 }

@@ -40,7 +40,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -83,7 +82,7 @@ fun MyProfileScreen(
     LaunchedEffect(Unit) {
         oneTimeUpdateState(true)
     }
-    val isRefreshContent by mainViewModel.isRefreshPrevContent
+    val isRefreshContent by mainViewModel.isRefreshMyProfileContent
     val snackbarHostState = remember {
         SnackbarHostState()
     }
@@ -94,14 +93,14 @@ fun MyProfileScreen(
     if(isRefreshContent){
         myProfileViewModel.getUserProfile(currentUserId)
         // reset
-        mainViewModel.refreshPrevContent(false)
+        mainViewModel.refreshMyProfileContent(false)
     }
 
     MyProfileContent(
         snackbarHostState = snackbarHostState,
         isMentorValid = isMentorValid,
         onFabClick = {
-            currentUserId?.let(navigateToAddMentor)
+            currentUserId.let(navigateToAddMentor)
         },
         modifier = modifier,
     ) { innerPadding ->
@@ -534,7 +533,7 @@ fun MyProfileBody(
                         .data(photoProfile)
                         .crossfade(true)
                         .build(),
-                    placeholder = painterResource(id = R.drawable.avatar_loading_placeholder),
+                    placeholder = painterResource(id = R.drawable.circle_avatar_loading_placeholder),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -815,7 +814,7 @@ fun ReviewCard(
                         .data(photoProfile)
                         .crossfade(true)
                         .build(),
-                    placeholder = painterResource(id = R.drawable.avatar_loading_placeholder),
+                    placeholder = painterResource(id = R.drawable.circle_avatar_loading_placeholder),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

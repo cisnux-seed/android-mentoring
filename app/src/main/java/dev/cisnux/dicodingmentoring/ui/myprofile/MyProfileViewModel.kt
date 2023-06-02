@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.domain.models.GetUserProfile
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
-import dev.cisnux.dicodingmentoring.domain.repositories.UserProfileRepository
+import dev.cisnux.dicodingmentoring.domain.repositories.UserRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -16,7 +16,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MyProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userProfileRepository: UserProfileRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
     private val _myProfileState = mutableStateOf<UiState<GetUserProfile>>(UiState.Initialize)
     val myProfileState: State<UiState<GetUserProfile>> get() = _myProfileState
@@ -37,7 +37,7 @@ class MyProfileViewModel @Inject constructor(
     fun getUserProfile(id: String) = viewModelScope.launch {
         if (id.isNotBlank()) {
             _myProfileState.value = UiState.Loading
-            val result = userProfileRepository.getUserProfileById(id)
+            val result = userRepository.getUserProfileById(id)
             result.fold({ exception ->
                 _myProfileState.value = UiState.Error(exception)
             }, { getUserProfile ->

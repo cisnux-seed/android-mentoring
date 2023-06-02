@@ -82,7 +82,6 @@ fun DicodingMentoringApp(
     MainAppContent(
         onLogout = {
             mainViewModel.logout()
-            Log.d("logout", "clicked")
             mainViewModel.updateBottomState(false)
             navigationActions.navigateToLogin()
         },
@@ -182,6 +181,7 @@ fun MainAppContent(
                     visible = shouldBottomBarOpen
                 ) {
                     BottomBar(currentRoute = currentRoute, onSelected = { destination ->
+                        navController.popBackStack()
                         navController.navigate(destination) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -341,7 +341,7 @@ fun NavigationDrawerItems(
         )
     }
 
-    BackHandler {
+    BackHandler(drawerState.isOpen) {
         if (drawerState.isOpen)
             coroutineScope.launch {
                 drawerState.close()

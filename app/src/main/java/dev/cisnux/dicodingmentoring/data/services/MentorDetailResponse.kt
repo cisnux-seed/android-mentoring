@@ -4,19 +4,14 @@ import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 import dev.cisnux.dicodingmentoring.domain.models.Expertise
 
-data class MentorResponse(
-
+data class MentorDetailResponse(
 	@Json(name="data")
 	val data: MentorProfileData
 )
 
 data class MentorProfileData(
-
 	@Json(name="expertises")
 	val expertises: List<ExpertisesItem>,
-
-	@Json(name="id")
-	val id: String
 )
 
 @JsonClass(generateAdapter = true)

@@ -88,7 +88,7 @@ fun RegisterProfileScreen(
     val snackbarHostState = remember {
         SnackbarHostState()
     }
-    val maxAboutLength = 160
+    val maxAboutLength = 320
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -195,7 +195,7 @@ fun RegisterProfileContent(
     context: Context,
     scrollState: ScrollState,
     keyboardController: SoftwareKeyboardController?,
-    aboutMaxLength:Int,
+    aboutMaxLength: Int,
     modifier: Modifier = Modifier,
     imageUri: Uri? = null,
 ) {
@@ -385,7 +385,11 @@ fun RegisterProfileContent(
 }
 
 @Composable
-fun GridCheckBoxInterest(count: Int, checkBoxes: List<CheckBoxItem>, modifier: Modifier = Modifier) {
+fun GridCheckBoxInterest(
+    count: Int,
+    checkBoxes: List<CheckBoxItem>,
+    modifier: Modifier = Modifier
+) {
     val gridItems = checkBoxes.chunked(count)
 
     Column(

@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.domain.models.AddUserProfile
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
-import dev.cisnux.dicodingmentoring.domain.repositories.UserProfileRepository
+import dev.cisnux.dicodingmentoring.domain.repositories.UserRepository
 import dev.cisnux.dicodingmentoring.utils.UiState
 import dev.cisnux.dicodingmentoring.utils.isValidAbout
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterProfileViewModel @Inject constructor(
     private val authRepository: AuthRepository,
-    private val userProfileRepo: UserProfileRepository
+    private val userProfileRepo: UserRepository
 ) : ViewModel() {
     private val _fullName = mutableStateOf("")
     val fullName: State<String> get() = _fullName
