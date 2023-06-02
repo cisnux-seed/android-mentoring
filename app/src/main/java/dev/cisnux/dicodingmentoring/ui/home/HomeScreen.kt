@@ -52,6 +52,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     drawerState: DrawerState,
     mainViewModel: MainViewModel,
+    navigateToDetailMentor: (id: String) -> Unit,
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -91,6 +92,7 @@ fun HomeScreen(
                     HomeBody(
                         context = context,
                         mentors = (mentorsState as UiState.Success<List<GetMentor>>).data!!,
+                        navigateToDetailMentor = navigateToDetailMentor,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -230,6 +232,7 @@ fun HomeContentPreview() {
                                 job = "Front-End Developer"
                             ),
                         ),
+                        navigateToDetailMentor = {},
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -347,7 +350,8 @@ fun HomeBodyPreview() {
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
-                )
+                ),
+                navigateToDetailMentor = {}
             )
         }
     }
@@ -360,7 +364,8 @@ fun HomeBodyPreviewWhenEmpty() {
         DicodingMentoringTheme {
             HomeBody(
                 context = LocalContext.current,
-                mentors = emptyList()
+                mentors = emptyList(),
+                navigateToDetailMentor = {}
             )
         }
     }
@@ -370,6 +375,7 @@ fun HomeBodyPreviewWhenEmpty() {
 fun HomeBody(
     mentors: List<GetMentor>,
     context: Context,
+    navigateToDetailMentor: (id: String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (mentors.isEmpty()) {
@@ -396,7 +402,9 @@ fun HomeBody(
                         job = mentor.job,
                         averageRating = mentor.averageRating,
                         context = context,
-                        onClick = {}
+                        onClick = {
+                            navigateToDetailMentor(mentor.id)
+                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Divider(

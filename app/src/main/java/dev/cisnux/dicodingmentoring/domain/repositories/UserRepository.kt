@@ -7,7 +7,8 @@ import dev.cisnux.dicodingmentoring.domain.models.GetMentor
 import dev.cisnux.dicodingmentoring.domain.models.GetUserProfile
 
 interface UserRepository {
-    suspend fun getUserProfileById(id: String): Either<Exception, GetUserProfile>
+    suspend fun getMenteeProfileById(id: String): Either<Exception, GetUserProfile>
+    suspend fun getMentorProfileById(id: String): Either<Exception, GetUserProfile>
     suspend fun addMenteeProfile(
         userProfile: AddUserProfile
     ): Either<Exception, Nothing?>

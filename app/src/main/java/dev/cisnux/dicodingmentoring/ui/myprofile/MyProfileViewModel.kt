@@ -29,15 +29,15 @@ class MyProfileViewModel @Inject constructor(
         viewModelScope.launch {
             authRepository.currentUser().collectLatest {
                 _currentUserId.value = it.uid
-                getUserProfile(it.uid)
+                getMenteeProfile(it.uid)
             }
         }
     }
 
-    fun getUserProfile(id: String) = viewModelScope.launch {
+    fun getMenteeProfile(id: String) = viewModelScope.launch {
         if (id.isNotBlank()) {
             _myProfileState.value = UiState.Loading
-            val result = userRepository.getUserProfileById(id)
+            val result = userRepository.getMenteeProfileById(id)
             result.fold({ exception ->
                 _myProfileState.value = UiState.Error(exception)
             }, { getUserProfile ->

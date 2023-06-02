@@ -4,7 +4,6 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -15,8 +14,8 @@ import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.addmentor.AddMentorScreen
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
+import dev.cisnux.dicodingmentoring.ui.mentordetail.MentorDetailScreen
 import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileScreen
-import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileViewModel
 import dev.cisnux.dicodingmentoring.ui.register.RegisterScreen
 import dev.cisnux.dicodingmentoring.ui.registerprofile.RegisterProfileScreen
 import dev.cisnux.dicodingmentoring.ui.resetpassword.ResetPasswordScreen
@@ -71,7 +70,8 @@ fun AppNavGraph(
             ) {
                 HomeScreen(
                     mainViewModel = mainViewModel,
-                    drawerState = drawerState
+                    navigateToDetailMentor = navigationActions.navigateToDetailMentor,
+                    drawerState = drawerState,
                 )
             }
             composable(
@@ -92,6 +92,22 @@ fun AppNavGraph(
                     navigateToMyProfile = navigationActions.navigateToMyProfile,
                     mainViewModel = mainViewModel,
                 )
+            }
+            composable(
+                route = AppDestinations.MENTOR_DETAIL_ROUTE,
+                arguments = listOf(navArgument("id") {
+                    type = NavType.StringType
+                })
+            ) {
+                val id = it.arguments?.getString("id")
+                id?.let {
+                    MentorDetailScreen(
+                        id = id,
+                        navigateUp = navigationActions.navigateUp,
+                        navigateToAddMentoring = {},
+                        mainViewModel = mainViewModel,
+                    )
+                }
             }
             composable(
                 route = AppDestinations.REGISTER_PROFILE_ROUTE,

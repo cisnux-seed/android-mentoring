@@ -32,7 +32,7 @@ class UserRepositoryImpl @Inject constructor(
     private val fileService: FileService,
     private val mentorRemoteDataSource: MentorRemoteDataSource
 ) : UserRepository {
-    override suspend fun getUserProfileById(id: String): Either<Exception, GetUserProfile> =
+    override suspend fun getMenteeProfileById(id: String): Either<Exception, GetUserProfile> =
         withContext(Dispatchers.IO) {
             try {
                 val userProfileResponse = menteeRemoteDataSource.getMenteeProfileById(id).data
@@ -40,6 +40,38 @@ class UserRepositoryImpl @Inject constructor(
                     if (userProfileResponse.isMentorValid)
                         mentorRemoteDataSource.getMentorProfileById(id).data.expertises
                     else emptyList()
+                val getUserProfile = GetUserProfile(
+                    id = userProfileResponse.id,
+                    photoProfileUrl = userProfileResponse.photoProfileUrl,
+                    fullName = userProfileResponse.fullName,
+                    username = userProfileResponse.username,
+                    email = userProfileResponse.email,
+                    job = userProfileResponse.job,
+                    about = userProfileResponse.about,
+                    isMentorValid = userProfileResponse.isMentorValid,
+                    expertises = expertises.asExpertises()
+                )
+                Either.Right(getUserProfile)
+            } catch (e: IOException) {
+                Either.Left(Failure.ConnectionFailure("No internet connection"))
+            } catch (e: HttpException) {
+                val statusCode = e.response()?.code()
+                val failure = HTTP_FAILURES[statusCode]
+                val errorBody = e.response()?.errorBody()?.string()
+                errorBody?.let {
+                    failure?.message = JSONObject(it).getString("message")
+                }
+                Either.Left(failure ?: e)
+            } catch (e: Exception) {
+                Either.Left(e)
+            }
+        }
+
+    override suspend fun getMentorProfileById(id: String): Either<Exception, GetUserProfile> =
+        withContext(Dispatchers.IO) {
+            try {
+                val userProfileResponse = menteeRemoteDataSource.getMenteeProfileById(id).data
+                val expertises: List<ExpertisesItem> = mentorRemoteDataSource.getMentorProfileById(id).data.expertises
                 val getUserProfile = GetUserProfile(
                     id = userProfileResponse.id,
                     photoProfileUrl = userProfileResponse.photoProfileUrl,

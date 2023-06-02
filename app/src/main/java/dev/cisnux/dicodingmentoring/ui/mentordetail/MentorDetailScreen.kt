@@ -1,22 +1,22 @@
-package dev.cisnux.dicodingmentoring.ui.myprofile
+package dev.cisnux.dicodingmentoring.ui.mentordetail
 
-import androidx.compose.foundation.background
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -30,12 +30,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import dev.cisnux.dicodingmentoring.R
+import dev.cisnux.dicodingmentoring.domain.models.Expertise
 import dev.cisnux.dicodingmentoring.domain.models.Review
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.components.ProfileBody
@@ -43,41 +44,35 @@ import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import dev.cisnux.dicodingmentoring.utils.UiState
 
 @Composable
-fun MyProfileScreen(
+fun MentorDetailScreen(
     mainViewModel: MainViewModel,
-    navigateToAddMentor: (id: String) -> Unit,
+    id: String,
+    navigateUp: () -> Unit,
+    navigateToAddMentoring: (id: String) -> Unit,
     modifier: Modifier = Modifier,
-    myProfileViewModel: MyProfileViewModel = hiltViewModel(),
+    mentorDetailViewModel: MentorDetailViewModel = hiltViewModel()
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
     LaunchedEffect(Unit) {
-        oneTimeUpdateState(true)
+        oneTimeUpdateState(false)
     }
-    val isRefreshContent by mainViewModel.isRefreshMyProfileContent
     val snackbarHostState = remember {
         SnackbarHostState()
     }
-    val myProfileState by myProfileViewModel.myProfileState
-    val isMentorValid by myProfileViewModel.isMentorValid
-    val currentUserId by myProfileViewModel.currentUserId
+    val mentorDetailState by mentorDetailViewModel.mentorDetailState
 
-    if(isRefreshContent){
-        myProfileViewModel.getMenteeProfile(currentUserId)
-        // reset
-        mainViewModel.refreshMyProfileContent(false)
-    }
-
-    MyProfileContent(
-        snackbarHostState = snackbarHostState,
-        isMentorValid = isMentorValid,
-        onFabClick = {
-            currentUserId.let(navigateToAddMentor)
-        },
+    MentorDetailContent(
         modifier = modifier,
+        snackbarHostState = snackbarHostState,
+        onFabClick = {
+            navigateToAddMentoring(id)
+        }
     ) { innerPadding ->
-        when (myProfileState) {
+        when (mentorDetailState) {
+            is UiState.Initialize -> mentorDetailViewModel.getMentorProfile()
+
             is UiState.Error -> {
-                (myProfileState as UiState.Error).error?.let { exception ->
+                (mentorDetailState as UiState.Error).error?.let { exception ->
                     LaunchedEffect(snackbarHostState) {
                         exception.message?.let { snackbarHostState.showSnackbar(it) }
                     }
@@ -86,9 +81,9 @@ fun MyProfileScreen(
 
             is UiState.Success -> {
                 val context = LocalContext.current
-                val userProfile = (myProfileState as UiState.Success).data
-                userProfile?.let {
-                    ProfileBody(
+                val mentorProfile = (mentorDetailState as UiState.Success).data
+                mentorProfile?.let {
+                    MentorDetailBody(
                         fullName = it.fullName,
                         job = it.job,
                         email = it.email,
@@ -136,7 +131,8 @@ fun MyProfileScreen(
                             ),
                         ),
                         expertises = it.expertises,
-                        isEditable = true,
+                        isEditable = false,
+                        navigateUp = navigateUp
                     )
                 }
             }
@@ -152,32 +148,26 @@ fun MyProfileScreen(
                     CircularProgressIndicator(modifier = Modifier.size(48.dp))
                 }
             }
-            else ->{}
         }
     }
 }
 
-@Preview(
-    showSystemUi = true, showBackground = true,
-    device = "spec:parent=pixel_6_pro,orientation=landscape"
-)
+@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun MyProfileContentLandscapePreviewWhenSuccess() {
-    DicodingMentoringTheme {
-        Surface {
-            MyProfileContent(
+fun MentorDetailContentPreview() {
+    Surface {
+        DicodingMentoringTheme {
+            MentorDetailContent(
                 snackbarHostState = SnackbarHostState(),
-                isMentorValid = false,
-                onFabClick = {}
-            ) {
-                ProfileBody(
+                onFabClick = { }
+            ) { innerPadding ->
+                MentorDetailBody(
                     fullName = "Exodus Trivellan",
-                    job = "Software Engineer at Apple",
+                    job = "Computer Engineering Student at Telkom University",
                     email = "exodusjack@gmail.com",
                     username = "exoduse123",
                     about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus. Donec nec tortor a dolor consectetur tincidunt eu sit amet elit. Nulla convallis ligula et nisl hendrerit, id ultrices elit malesuada. In tincidunt risus in arcu tempor, id malesuada metus congue.",
-                    photoProfile = null,
-                    modifier = Modifier.padding(it),
+                    photoProfile = "https://i.pinimg.com/originals/50/d4/29/50d429ea5c9afe0ef9cb3c96f784bea4.jpg",
                     context = LocalContext.current,
                     isMentor = true,
                     reviews = listOf(
@@ -217,109 +207,83 @@ fun MyProfileContentLandscapePreviewWhenSuccess() {
                             rating = 4.5f,
                         ),
                     ),
-                    isEditable = true,
-                    expertises = emptyList()
-                )
-            }
-        }
-    }
-}
-
-@Preview(
-    showSystemUi = true, showBackground = true,
-    device = "spec:parent=pixel_6_pro,orientation=portrait"
-)
-@Composable
-fun MyProfileContentPortraitPreviewWhenSuccess() {
-    DicodingMentoringTheme {
-        Surface {
-            MyProfileContent(
-                snackbarHostState = SnackbarHostState(),
-                isMentorValid = false,
-                onFabClick = {}
-            ) {
-                ProfileBody(
-                    fullName = "Exodus Trivellan",
-                    job = "Software Engineer at Apple",
-                    email = "exodusjack@gmail.com",
-                    username = "exoduse123",
-                    about = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus. Donec nec tortor a dolor consectetur tincidunt eu sit amet elit. Nulla convallis ligula et nisl hendrerit, id ultrices elit malesuada. In tincidunt risus in arcu tempor, id malesuada metus congue.",
-                    photoProfile = "https://i.pinimg.com/originals/50/d4/29/50d429ea5c9afe0ef9cb3c96f784bea4.jpg",
-                    modifier = Modifier.padding(it),
-                    context = LocalContext.current,
-                    isMentor = false,
-                    reviews = listOf(
-                        Review(
-                            fullName = "Eren Jaeger",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
+                    isEditable = false,
+                    expertises = listOf(
+                        Expertise(
+                            learningPath = "Android",
+                            experienceLevel = "Beginner",
+                            skills = listOf(
+                                "Object-Oriented Programming",
+                                "Room",
+                                "Jetpack Compose"
+                            ),
+                            certificates = listOf(
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                            )
                         ),
-                        Review(
-                            fullName = "Erwin Smith",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
+                        Expertise(
+                            learningPath = "iOS",
+                            experienceLevel = "Expert",
+                            skills = listOf(
+                                "Object-Oriented Programming",
+                                "Room",
+                                "Jetpack Compose"
+                            ), certificates = listOf(
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                            )
                         ),
-                        Review(
-                            fullName = "Levi Ackerman",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
+                        Expertise(
+                            learningPath = "Front-End",
+                            experienceLevel = "Intermediate",
+                            skills = listOf(
+                                "Object-Oriented Programming",
+                                "Room",
+                                "Jetpack Compose"
+                            ), certificates = listOf(
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                            )
                         ),
-                        Review(
-                            fullName = "Mikassa Ackerman",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
-                        ),
-                        Review(
-                            fullName = "Armin",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
-                        ),
-                        Review(
-                            fullName = "Zeke Jaeger",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
-                        ),
-                        Review(
-                            fullName = "Reiner",
-                            comment = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce finibus leo id enim feugiat, sed tempor erat lacinia. Vestibulum luctus, nisl non sagittis interdum, quam velit condimentum purus, ac pulvinar orci quam id metus.",
-                            rating = 4.5f,
+                        Expertise(
+                            learningPath = "Machine Learning",
+                            experienceLevel = "Beginner",
+                            skills = listOf(
+                                "Object-Oriented Programming",
+                                "Room",
+                                "Jetpack Compose"
+                            ),
+                            certificates = listOf(
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                                "https://www.google.com",
+                            )
                         ),
                     ),
-                    isEditable = true,
-                    expertises = emptyList()
+                    modifier = Modifier.padding(innerPadding),
+                    navigateUp = {},
                 )
             }
         }
     }
 }
 
-@Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun MyProfileContentPreviewWhenLoading() {
-    DicodingMentoringTheme {
-        Surface {
-            MyProfileContent(
-                snackbarHostState = SnackbarHostState(),
-                onFabClick = {},
-                isMentorValid = false
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(48.dp))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun MyProfileContent(
+fun MentorDetailContent(
     snackbarHostState: SnackbarHostState,
     onFabClick: () -> Unit,
-    isMentorValid: Boolean,
     modifier: Modifier = Modifier,
     body: @Composable (innerPadding: PaddingValues) -> Unit,
 ) {
@@ -329,16 +293,19 @@ fun MyProfileContent(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            if (!isMentorValid) {
-                ExtendedFloatingActionButton(
-                    onClick = onFabClick,
+            ExtendedFloatingActionButton(
+                onClick = onFabClick,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = null)
-                        Text(text = "JOIN US", style = MaterialTheme.typography.labelLarge)
-                    }
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_connect),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(text = "Connect", style = MaterialTheme.typography.labelLarge)
                 }
             }
         }
@@ -348,41 +315,51 @@ fun MyProfileContent(
 }
 
 @Composable
-fun GridChipInterest(
-    count: Int,
-    interests: List<String>,
-    modifier: Modifier = Modifier
+fun MentorDetailBody(
+    fullName: String,
+    job: String,
+    email: String,
+    username: String,
+    about: String,
+    isMentor: Boolean,
+    isEditable: Boolean,
+    modifier: Modifier = Modifier,
+    expertises: List<Expertise>,
+    reviews: List<Review>,
+    context: Context,
+    photoProfile: String? = null,
+    navigateUp: () -> Unit,
 ) {
-    val gridItems = interests.chunked(count)
-
-    Column(
-        horizontalAlignment = Alignment.Start,
+    Box(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
     ) {
-        gridItems.forEach {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                it.forEach { interest ->
-                    Text(
-                        text = interest,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.titleSmall,
-                        modifier = Modifier
-                            .padding(vertical = 4.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.secondaryContainer,
-                                shape = MaterialTheme.shapes.extraSmall
-                            )
-                            .clip(CircleShape)
-                            .padding(horizontal = 4.dp, vertical = 2.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                }
-            }
+        ProfileBody(
+            fullName = fullName,
+            job = job,
+            email = email,
+            username = username,
+            about = about,
+            photoProfile = photoProfile,
+            modifier = modifier,
+            context = context,
+            isMentor = isMentor,
+            reviews = reviews,
+            expertises = expertises,
+            isEditable = isEditable
+        )
+        IconButton(
+            onClick = navigateUp, modifier = Modifier
+                .padding(start = 5.dp, top = 6.dp)
+                .align(
+                    Alignment.TopStart
+                )
+        ) {
+            Icon(
+                tint = MaterialTheme.colorScheme.onBackground,
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "back to home page",
+            )
         }
     }
 }

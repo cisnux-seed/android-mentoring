@@ -13,7 +13,7 @@ object AppDestinations {
     const val HOME_ROUTE = "home"
     const val REGISTER_PROFILE_ROUTE = "registerprofile/{id}"
     const val FAVORITE_MENTOR_ROUTE = "favoritementor"
-    const val MENTOR_PROFILE_ROUTE = "mentorprofile/{id}"
+    const val MENTOR_DETAIL_ROUTE = "mentordetail/{id}"
     const val MY_PROFILE_ROUTE = "myprofile"
     const val ADD_MENTOR_ROUTE = "addmentor/{id}"
 }
@@ -50,7 +50,7 @@ class AppNavigationActions(
         }
     }
     val navigateToAddMentor: (id: String) -> Unit = { id ->
-        navController.navigate("addmentor/$id"){
+        navController.navigate("addmentor/$id") {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
@@ -58,8 +58,11 @@ class AppNavigationActions(
             launchSingleTop = true
         }
     }
+    val navigateToDetailMentor: (id: String) -> Unit = { id ->
+        navController.navigate("mentordetail/$id")
+    }
     val navigateToMyProfile: () -> Unit = {
-        navController.navigate(AppDestinations.MY_PROFILE_ROUTE){
+        navController.navigate(AppDestinations.MY_PROFILE_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
