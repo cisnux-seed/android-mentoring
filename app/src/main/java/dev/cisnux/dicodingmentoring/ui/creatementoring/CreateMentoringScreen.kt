@@ -1,21 +1,25 @@
 package dev.cisnux.dicodingmentoring.ui.creatementoring
 
-import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -24,33 +28,43 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SelectableDates
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimeInput
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.isContainer
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
-import java.time.DayOfWeek
-import java.time.Instant
-import java.time.ZoneId
+import kotlinx.coroutines.launch
 import java.util.Calendar
-import java.util.TimeZone
 
 @Composable
 fun CreateMentoringScreen(
@@ -59,9 +73,19 @@ fun CreateMentoringScreen(
     navigateUp: () -> Unit,
     createMentoringViewModel: CreateMentoringViewModel = hiltViewModel(),
 ) {
+    val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
+    LaunchedEffect(Unit) {
+        oneTimeUpdateState(false)
+    }
     val title by createMentoringViewModel.title
     val description by createMentoringViewModel.description
     val mentoringType by createMentoringViewModel.mentoringType
+    val mentoringDate by createMentoringViewModel.mentoringDate
+    val mentoringTime by createMentoringViewModel.mentoringTime
+    val coroutineScope = rememberCoroutineScope()
+    val snackbarHostState = remember{
+        SnackbarHostState()
+    }
 
     CreateMentoringContent(
         modifier = modifier,
@@ -78,9 +102,43 @@ fun CreateMentoringScreen(
                     stringResource(id = R.string.chat),
                     stringResource(id = R.string.meet)
                 ),
+                onMentoringDateChanged = createMentoringViewModel::onMentoringDateChanged,
+                mentoringDate = mentoringDate,
                 modifier = Modifier.padding(innerPadding),
+                mentoringTime = mentoringTime,
+                onMentoringTimeChanged = createMentoringViewModel::onMentoringTimeChanged,
+                onCrateMentoring = {
+                    if(title.isBlank()){
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("the problem title must be filled")
+                        }
+                        return@CreateMentoringBody
+                    }
+
+                    if(description.isBlank()){
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("the description must be filled")
+                        }
+                        return@CreateMentoringBody
+                    }
+
+                    if(mentoringDate.isBlank()){
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("the mentoring date must be filled with correct date")
+                        }
+                        return@CreateMentoringBody
+                    }
+
+                    if(mentoringTime.isBlank()){
+                        coroutineScope.launch {
+                            snackbarHostState.showSnackbar("the mentoring time be filled with correct date")
+                        }
+                        return@CreateMentoringBody
+                    }
+                }
             )
-        }
+        },
+        snackbarHostState = snackbarHostState
     )
 }
 
@@ -99,13 +157,19 @@ fun CreateMentoringContentPreview() {
                         onDescriptionChanged = {},
                         onMentoringType = {},
                         mentoringType = "",
+                        mentoringDate = "",
                         modifier = Modifier.padding(innerPadding),
+                        onMentoringDateChanged = {},
                         radioTitles = listOf(
                             stringResource(id = R.string.chat),
                             stringResource(id = R.string.meet)
                         ),
+                        mentoringTime = "",
+                        onMentoringTimeChanged = {},
+                        onCrateMentoring = {}
                     )
-                }
+                },
+                snackbarHostState = SnackbarHostState()
             )
         }
     }
@@ -117,13 +181,23 @@ fun CreateMentoringBody(
     title: String,
     onTitleChanged: (String) -> Unit,
     mentoringType: String,
+    mentoringDate: String,
+    mentoringTime: String,
+    onMentoringDateChanged: (Long?) -> Unit,
+    onMentoringTimeChanged: (Long?) -> Unit,
     description: String,
     onDescriptionChanged: (String) -> Unit,
     onMentoringType: (String) -> Unit,
     radioTitles: List<String>,
+    onCrateMentoring: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val openDialog = remember { mutableStateOf(true) }
+    var openDateDialog by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    val showingPicker = remember { mutableStateOf(true) }
+    val configuration = LocalConfiguration.current
+    val state = rememberTimePickerState()
+
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
@@ -159,32 +233,32 @@ fun CreateMentoringBody(
             ),
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = "Mentoring Type:"
-        )
-        Column(
-            Modifier
-                .selectableGroup()
-                .padding(start = 12.dp)
-        ) {
-            radioTitles.forEach { title ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    RadioButton(
-                        selected = title == mentoringType,
-                        onClick = {
-                            onMentoringType(title)
-                        },
-                        modifier = Modifier.semantics { contentDescription = title }
+        OutlinedTextField(
+            value = mentoringDate,
+            readOnly = true,
+            onValueChange = {},
+            modifier = Modifier
+                .fillMaxWidth(),
+            placeholder = {
+                Text(text = "Select the date for mentoring")
+            },
+            leadingIcon = {
+                IconButton(onClick = {
+                    openDateDialog = true
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_date_24),
+                        contentDescription = "select date mentoring"
                     )
-                    Text(text = title)
                 }
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        if (openDialog.value){
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                disabledBorderColor = MaterialTheme.colorScheme.onBackground,
+            ),
+        )
+        if (openDateDialog) {
             val datePickerState = rememberDatePickerState()
             val confirmEnabled = remember {
                 derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -192,16 +266,13 @@ fun CreateMentoringBody(
 
             DatePickerDialog(
                 onDismissRequest = {
-                    // Dismiss the dialog when the user clicks outside the dialog or on the back
-                    // button. If you want to disable that functionality, simply use an empty
-                    // onDismissRequest.
-                    openDialog.value = false
+                    openDateDialog = false
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
-                            datePickerState.selectedDateMillis
+                            openDateDialog = false
+                            onMentoringDateChanged(datePickerState.selectedDateMillis)
                         },
                         enabled = confirmEnabled.value
                     ) {
@@ -211,7 +282,7 @@ fun CreateMentoringBody(
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            openDialog.value = false
+                            openDateDialog = false
                         }
                     ) {
                         Text("Cancel")
@@ -221,6 +292,126 @@ fun CreateMentoringBody(
                 DatePicker(state = datePickerState)
             }
         }
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = mentoringTime,
+            readOnly = true,
+            onValueChange = {},
+            modifier = Modifier
+                .fillMaxWidth(),
+            placeholder = {
+                Text(text = "Select the time for mentoring")
+            },
+            leadingIcon = {
+                IconButton(onClick = {
+                    showTimePicker = true
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_time_24),
+                        contentDescription = "select date mentoring"
+                    )
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedBorderColor = MaterialTheme.colorScheme.onBackground,
+                disabledBorderColor = MaterialTheme.colorScheme.onBackground,
+            ),
+        )
+        if (showTimePicker) {
+            TimePickerDialog(
+                title = if (showingPicker.value) {
+                    "Select Time "
+                } else {
+                    "Enter Time"
+                },
+                onCancel = { showTimePicker = false },
+                onConfirm = {
+                    val cal = Calendar.getInstance()
+                    cal.set(Calendar.HOUR_OF_DAY, state.hour)
+                    cal.set(Calendar.MINUTE, state.minute)
+                    cal.isLenient = false
+                    onMentoringTimeChanged(cal.timeInMillis)
+                    showTimePicker = false
+                },
+                toggle = {
+                    if (configuration.screenHeightDp > 400) {
+                        // Make this take the entire viewport. This will guarantee that Screen readers
+                        // focus the toggle first.
+                        Box(
+                            Modifier
+                                .fillMaxSize()
+                                .semantics {
+                                    @Suppress("DEPRECATION")
+                                    isContainer = true
+                                }
+                        ) {
+                            IconButton(
+                                modifier = Modifier
+                                    // This is a workaround so that the Icon comes up first
+                                    // in the talkback traversal order. So that users of a11y
+                                    // services can use the text input. When talkback traversal
+                                    // order is customizable we can remove this.
+                                    .size(64.dp, 72.dp)
+                                    .align(Alignment.BottomStart)
+                                    .zIndex(5f),
+                                onClick = { showingPicker.value = !showingPicker.value }) {
+                                val icon = painterResource(
+                                    id = if (showingPicker.value) {
+                                        R.drawable.ic_keyboard_24
+                                    } else {
+                                        R.drawable.ic_schedule_24
+                                    }
+                                )
+                                Icon(
+                                    painter = icon,
+                                    contentDescription = if (showingPicker.value) {
+                                        "Switch to Text Input"
+                                    } else {
+                                        "Switch to Touch Input"
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            ) {
+                if (showingPicker.value && configuration.screenHeightDp > 400) {
+                    TimePicker(state = state)
+                } else {
+                    TimeInput(state = state)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Mentoring Type:"
+        )
+        radioTitles.forEach { title ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .selectableGroup()
+                    .fillMaxWidth()
+            ) {
+                RadioButton(
+                    selected = title == mentoringType,
+                    onClick = {
+                        onMentoringType(title)
+                    },
+                    modifier = Modifier.semantics { contentDescription = title }
+                )
+                Text(text = title)
+            }
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            shape = MaterialTheme.shapes.small,
+            onClick = onCrateMentoring,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(text = "Create Mentoring")
+        }
     }
 }
 
@@ -228,11 +419,15 @@ fun CreateMentoringBody(
 @Composable
 fun CreateMentoringContent(
     navigateUp: () -> Unit,
+    snackbarHostState: SnackbarHostState,
     body: @Composable (innerPadding: PaddingValues) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
         modifier = modifier,
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
         topBar = {
             CenterAlignedTopAppBar(
                 navigationIcon = {
@@ -250,5 +445,65 @@ fun CreateMentoringContent(
         },
     ) { innerPadding ->
         body(innerPadding)
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    title: String = "Select Time",
+    onCancel: () -> Unit,
+    onConfirm: () -> Unit,
+    toggle: @Composable () -> Unit = {},
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onCancel,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surface
+                ),
+        ) {
+            toggle()
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                content()
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    TextButton(
+                        onClick = onCancel
+                    ) {
+                        Text("Cancel")
+                    }
+                    TextButton(
+                        onClick = onConfirm
+                    ) {
+                        Text("OK")
+                    }
+                }
+            }
+        }
     }
 }

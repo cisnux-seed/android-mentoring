@@ -20,6 +20,11 @@ fun String.asList() = replace("[^\\S\r\n]+".toRegex(), "").split("\n")
 
 fun Long.withDateFormat(): String {
     val date = Date(this)
-    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
     return DateFormat.getDateInstance(DateFormat.FULL).format(date)
+}
+
+fun Long.withTimeFormat(): String {
+    val date = Date(this)
+    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    return formatter.format(date)
 }
