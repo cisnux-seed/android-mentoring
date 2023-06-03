@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -203,7 +204,7 @@ fun LoginContent(
                 .clickable(onClick = navigateToResetPassword)
                 .fillMaxWidth(),
             textAlign = TextAlign.End,
-            color = Color.Blue,
+            color = if(!isSystemInDarkTheme()) Color.Blue else Color.Cyan,
             style = MaterialTheme.typography.labelLarge
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -247,7 +248,7 @@ fun LoginContent(
                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) {
                     append(stringResource(R.string.signup_title_action))
                 }
-                withStyle(style = SpanStyle(color = Color.Blue)) {
+                withStyle(style = SpanStyle(color = if(!isSystemInDarkTheme()) Color.Blue else Color.Cyan)) {
                     append(stringResource(R.string.sign_up))
                 }
             },

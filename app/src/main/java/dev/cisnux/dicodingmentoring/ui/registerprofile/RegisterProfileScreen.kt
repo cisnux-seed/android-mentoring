@@ -383,39 +383,3 @@ fun RegisterProfileContent(
         }
     }
 }
-
-@Composable
-fun GridCheckBoxInterest(
-    count: Int,
-    checkBoxes: List<CheckBoxItem>,
-    modifier: Modifier = Modifier
-) {
-    val gridItems = checkBoxes.chunked(count)
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(start = 12.dp)
-    ) {
-        gridItems.forEach {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                it.forEach { checkBoxItem ->
-                    Row(
-                        modifier = Modifier.weight(1f),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(checked = checkBoxItem.checked, onCheckedChange = {
-                            checkBoxItem.onCheckedChange(it, checkBoxItem.title)
-                        })
-                        Spacer(modifier = Modifier.width(2.dp))
-                        Text(
-                            text = checkBoxItem.title
-                        )
-                    }
-                }
-            }
-        }
-    }
-}

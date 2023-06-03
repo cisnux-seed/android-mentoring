@@ -3,6 +3,7 @@ package dev.cisnux.dicodingmentoring.ui.register
 import android.content.Context
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -208,7 +209,7 @@ fun RegisterContent(
                 withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onBackground)) {
                     append(stringResource(R.string.signin_title_action))
                 }
-                withStyle(style = SpanStyle(color = Color.Blue)) {
+                withStyle(style = SpanStyle(color = if(!isSystemInDarkTheme()) Color.Blue else Color.Cyan)) {
                     append(stringResource(R.string.sign_in))
                 }
             },

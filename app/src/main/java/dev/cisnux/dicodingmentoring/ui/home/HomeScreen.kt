@@ -13,10 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -53,6 +57,7 @@ fun HomeScreen(
     drawerState: DrawerState,
     mainViewModel: MainViewModel,
     navigateToDetailMentor: (id: String) -> Unit,
+    navigateToMatchmaking: () -> Unit,
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -74,6 +79,9 @@ fun HomeScreen(
         snackbarHostState = snackbarHostState,
         coroutineScope = coroutineScope,
         drawerState = drawerState,
+        onFabClick = {
+            navigateToMatchmaking()
+        },
         query = "",
         onSearch = {},
         onOpenSearchBar = {
@@ -150,6 +158,7 @@ fun HomeContentPreview() {
                 onCloseSearchBar = {
                     expanded = false
                 },
+                onFabClick = {},
                 body = { innerPadding ->
                     HomeBody(
                         context = LocalContext.current,
@@ -249,6 +258,7 @@ fun HomeContent(
     onOpenSearchBar: () -> Unit,
     query: String,
     onSearch: (query: String) -> Unit,
+    onFabClick: () -> Unit,
     expanded: Boolean,
     onCloseSearchBar: () -> Unit,
     body: @Composable (innerPadding: PaddingValues) -> Unit,
@@ -273,6 +283,11 @@ fun HomeContent(
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onFabClick) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = "find mentor")
+            }
         }
     ) { innerPadding ->
         body(innerPadding)

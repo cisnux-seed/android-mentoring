@@ -163,12 +163,12 @@ class AuthRepositoryImpl @Inject constructor(
     override fun getGoogleIntent(): Intent = googleClient.signInIntent
 
     override suspend fun logout() {
-        googleClient.signOut().await()
+        googleClient.signOut()
         firebaseAuth.signOut()
     }
 
     override suspend fun logout(id: String) {
-        googleClient.signOut().await()
+        googleClient.signOut()
         authLocalDataSource.deleteAuthenticatedUser()
         authLocalDataSource.deleteSession(id)
         firebaseAuth.signOut()

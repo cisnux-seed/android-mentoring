@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -70,7 +69,7 @@ fun AddMentorScreen(
     addMentorViewModel: AddMentorViewModel = hiltViewModel(),
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
-    LaunchedEffect(Unit){
+    LaunchedEffect(Unit) {
         oneTimeUpdateState(false)
     }
     val snackbarHostState = remember {
@@ -431,7 +430,7 @@ fun AddMentorBody(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
         modifier = modifier
             .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -497,7 +496,7 @@ fun AddMentorBody(
             Button(
                 onClick = onJoin,
                 shape = MaterialTheme.shapes.small,
-                modifier = Modifier.width(140.dp)
+                modifier = Modifier.fillMaxWidth()
             ) {
                 if (!isLoading)
                     Text(text = "Join")

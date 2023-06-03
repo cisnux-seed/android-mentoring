@@ -41,4 +41,6 @@
     <string name="chat_page">Chat Page</string>
     <string name="menu_my_profile">My Profile</string>
     <string name="my_profile_page">my profile page</string>
+    <string name="chat">Chat</string>
+    <string name="meet">Meet</string>
 </resources>

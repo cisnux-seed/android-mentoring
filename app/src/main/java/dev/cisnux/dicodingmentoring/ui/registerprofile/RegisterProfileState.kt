@@ -9,7 +9,7 @@ import androidx.compose.ui.state.ToggleableState
 import kotlinx.parcelize.Parcelize
 
 @Composable
-fun rememberInterestsCheckBoxState(
+fun rememberLearningPathsCheckBoxState(
 ) = rememberSaveable {
     mutableStateOf(
         InterestsCheckBoxState(

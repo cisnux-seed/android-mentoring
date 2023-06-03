@@ -47,8 +47,8 @@ import dev.cisnux.dicodingmentoring.utils.UiState
 fun MentorDetailScreen(
     mainViewModel: MainViewModel,
     id: String,
+    navigateToCreateMentoring: (id: String) -> Unit,
     navigateUp: () -> Unit,
-    navigateToAddMentoring: (id: String) -> Unit,
     modifier: Modifier = Modifier,
     mentorDetailViewModel: MentorDetailViewModel = hiltViewModel()
 ) {
@@ -65,7 +65,7 @@ fun MentorDetailScreen(
         modifier = modifier,
         snackbarHostState = snackbarHostState,
         onFabClick = {
-            navigateToAddMentoring(id)
+            navigateToCreateMentoring(id)
         }
     ) { innerPadding ->
         when (mentorDetailState) {

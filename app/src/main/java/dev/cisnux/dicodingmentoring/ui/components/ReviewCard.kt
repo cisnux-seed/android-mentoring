@@ -104,7 +104,7 @@ fun ReviewCard(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             Text(text = fullName, style = MaterialTheme.typography.titleMedium)
         }
         Spacer(modifier = Modifier.height(4.dp))

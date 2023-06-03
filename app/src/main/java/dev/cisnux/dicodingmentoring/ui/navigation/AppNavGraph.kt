@@ -12,6 +12,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.addmentor.AddMentorScreen
+import dev.cisnux.dicodingmentoring.ui.creatementoring.CreateMentoringScreen
+import dev.cisnux.dicodingmentoring.ui.matchmentoring.MatchMakingScreen
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
 import dev.cisnux.dicodingmentoring.ui.mentordetail.MentorDetailScreen
@@ -39,7 +41,6 @@ fun AppNavGraph(
             startDestination = startDestination,
             modifier = modifier
         ) {
-
             composable(
                 route = AppDestinations.LOGIN_ROUTE,
             ) {
@@ -72,6 +73,7 @@ fun AppNavGraph(
                     mainViewModel = mainViewModel,
                     navigateToDetailMentor = navigationActions.navigateToDetailMentor,
                     drawerState = drawerState,
+                    navigateToMatchmaking = navigationActions.navigateToMatchmaking
                 )
             }
             composable(
@@ -104,10 +106,29 @@ fun AppNavGraph(
                     MentorDetailScreen(
                         id = id,
                         navigateUp = navigationActions.navigateUp,
-                        navigateToAddMentoring = {},
                         mainViewModel = mainViewModel,
+                        navigateToCreateMentoring = navigationActions.navigateToCreateMentoring
                     )
                 }
+            }
+            composable(
+                route = AppDestinations.MATCHMAKING_ROUTE,
+            ) {
+                MatchMakingScreen(
+                    navigateUp = navigationActions.navigateUp,
+                    mainViewModel = mainViewModel,
+                )
+            }
+            composable(
+                route = AppDestinations.CREATE_MENTORING_ROUTE,
+                arguments = listOf(navArgument("id") {
+                    type = NavType.StringType
+                })
+            ) {
+                CreateMentoringScreen(
+                    navigateUp = navigationActions.navigateUp,
+                    mainViewModel = mainViewModel,
+                )
             }
             composable(
                 route = AppDestinations.REGISTER_PROFILE_ROUTE,
