@@ -1,7 +1,6 @@
 package dev.cisnux.dicodingmentoring.data.remote
 
 import dev.cisnux.dicodingmentoring.data.services.MenteeResponse
-import dev.cisnux.dicodingmentoring.data.services.MentorListResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 

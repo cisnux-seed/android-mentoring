@@ -2,7 +2,6 @@
 
 package dev.cisnux.dicodingmentoring.ui.addmentor
 
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -377,7 +376,6 @@ fun AddMentorBodyPreview() {
                     mentoringForms[index] = mentoringForms[index].copy(learningPath = learningPath)
                 },
                 onSkillChanged = { skill, index ->
-                    Log.d("Add Mentor skill", skill)
                     mentoringForms[index] = mentoringForms[index].copy(skills = skill)
                 },
                 onCertificateUrlChanged = { certificateUrl, index ->
@@ -436,7 +434,6 @@ fun AddMentorBody(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         itemsIndexed(mentoringForms) { formIndex, mentoringForm ->
-            Log.d("AddMentorScreen", mentoringForms.size.toString())
             ExpertiseFormItem(
                 learningPathOptions = learningPathOptions,
                 learningPath = mentoringForm.learningPath,

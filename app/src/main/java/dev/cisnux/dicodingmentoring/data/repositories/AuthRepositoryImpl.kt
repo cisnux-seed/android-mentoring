@@ -1,7 +1,6 @@
 package dev.cisnux.dicodingmentoring.data.repositories
 
 import android.content.Intent
-import android.util.Log
 import arrow.core.Either
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.firebase.auth.FirebaseAuth

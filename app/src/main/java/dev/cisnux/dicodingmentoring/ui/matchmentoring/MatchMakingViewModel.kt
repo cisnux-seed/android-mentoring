@@ -1,6 +1,5 @@
 package dev.cisnux.dicodingmentoring.ui.matchmentoring
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -30,7 +29,6 @@ class MatchMakingViewModel @Inject constructor(
         else checkedInterests.remove(
             interest
         )
-        Log.d(MatchMakingViewModel::class.simpleName, checkedInterests.toString())
     }
 
     fun onProblemChanged(problem: String) {

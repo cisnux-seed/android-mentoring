@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">Dicoding\nMentoring</string>
-    <string name="sign_up_title_button">Sign Up</string>
-    <string name="sign_in_title_button">Sign In</string>
     <string name="invalid_email_message">Please enter a valid email address</string>
     <string name="invalid_password_message">Password should be 8 characters long and without any spaces</string>
     <string name="google_button_titile">Sign In With Google</string>
@@ -17,7 +15,6 @@
     <string name="reset_success_message">Great news! Your password has been successfully reset</string>
     <string name="reset_password_message_display">No worries, we’ll send you reset instructions</string>
     <string name="reset_password_display">Forgot Password?</string>
-    <string name="invalid_experience_message">experience level must be filled</string>
     <string name="invalid_job_message">job must be filled</string>
     <string name="invalid_username_message">username must be filled</string>
     <string name="invalid_full_name_message">full name must be filled</string>
@@ -34,13 +31,12 @@
     <string name="invalid_about_message">about form must be filled</string>
     <string name="home_page">home page</string>
     <string name="menu_home">Home</string>
-    <string name="menu_schedules">Schedules</string>
-    <string name="menu_mentorship">Mentorship</string>
-    <string name="mentorship_page">mentorship page</string>
+    <string name="menu_mentoring">Mentoring</string>
+    <string name="mentoring_page">mentoring page</string>
     <string name="chat_menu">Chat</string>
     <string name="chat_page">Chat Page</string>
     <string name="menu_my_profile">My Profile</string>
     <string name="my_profile_page">my profile page</string>
     <string name="chat">Chat</string>
-    <string name="meet">Meet</string>
+    <string name="video_chat">Video Chat</string>
 </resources>

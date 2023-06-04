@@ -6,6 +6,7 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'com.google.protobuf'
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 android {
@@ -135,4 +136,13 @@ dependencies {
 
     // datastore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // ktor
+    def ktor_version = "2.3.1"
+    implementation "io.ktor:ktor-client-core:$ktor_version"
+    implementation "io.ktor:ktor-client-cio:$ktor_version"
+    implementation "io.ktor:ktor-client-websockets:$ktor_version"
+    implementation "io.ktor:ktor-client-logging:$ktor_version"
+
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1"
 }

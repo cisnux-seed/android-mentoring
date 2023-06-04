@@ -2,27 +2,36 @@ package dev.cisnux.dicodingmentoring.ui.creatementoring
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.cisnux.dicodingmentoring.DicodingMentoringApplication
 import dev.cisnux.dicodingmentoring.R
+import dev.cisnux.dicodingmentoring.domain.models.AddMentoringSession
+import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
+import dev.cisnux.dicodingmentoring.domain.repositories.MentoringRepository
 import dev.cisnux.dicodingmentoring.utils.withDateFormat
 import dev.cisnux.dicodingmentoring.utils.withTimeFormat
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class CreateMentoringViewModel @Inject constructor(
+    private val mentoringRepository: MentoringRepository,
+    private val authRepository: AuthRepository,
     @ApplicationContext appContext: Context,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(appContext as Application) {
-    private val id = checkNotNull(savedStateHandle["id"]) as String
+    private val mentorId = checkNotNull(savedStateHandle["id"]) as String
+    private var menteeId: String? = null
     private val context = getApplication<DicodingMentoringApplication>()
 
     private val _title = mutableStateOf("")
@@ -31,31 +40,55 @@ class CreateMentoringViewModel @Inject constructor(
     val description: State<String> get() = _description
     private val _mentoringType = mutableStateOf(context.getString(R.string.chat))
     val mentoringType: State<String> get() = _mentoringType
-    private var mentoringDateMillis = 0L
-    private var mentoringTimeMillis = 0L
+    private var mentoringDateMillis = MutableStateFlow(0L)
+    private var mentoringTimeMillis = MutableStateFlow(0L)
     private val _mentoringDate = mutableStateOf("")
     val mentoringDate: State<String> get() = _mentoringDate
     private val _mentoringTime = mutableStateOf("")
     val mentoringTime get() = _mentoringTime
+    private val today = Calendar.getInstance().get(Calendar.DAY_OF_MONTH)
+    private val _isCreateMentoringSuccess = mutableStateOf(false)
+    val isCreateMentoringSuccess: State<Boolean> get() = _isCreateMentoringSuccess
+
+    init {
+        viewModelScope.launch {
+            authRepository.currentUser().collectLatest {
+                menteeId = it.uid
+            }
+        }
+    }
+
     fun onMentoringDateChanged(selectedDate: Long?) {
+        if (selectedDate != mentoringDateMillis.value) {
+            mentoringTimeMillis.value = 0L
+            _mentoringTime.value = ""
+        }
         selectedDate?.let { dateMillis ->
-            val todayCal = Calendar.getInstance()
-            val today = todayCal.get(Calendar.DAY_OF_MONTH)
             val selectedCal = Calendar.getInstance()
             selectedCal.time = Date(dateMillis)
             val currentDate = selectedCal.get(Calendar.DAY_OF_MONTH)
+
             if (currentDate >= today) {
-                mentoringDateMillis = dateMillis
-                _mentoringDate.value = selectedDate.withDateFormat()
+                mentoringDateMillis.value = dateMillis
+                _mentoringDate.value = mentoringDateMillis.value.withDateFormat()
             }
         }
     }
 
     fun onMentoringTimeChanged(selectedTime: Long?) {
         selectedTime?.let { timeMillis ->
-            if (timeMillis >= System.currentTimeMillis()) {
-                mentoringTimeMillis = timeMillis
-                _mentoringTime.value = timeMillis.withTimeFormat()
+            if (_mentoringDate.value.isNotBlank()) {
+                val selectedCal = Calendar.getInstance()
+                selectedCal.time = Date(mentoringDateMillis.value)
+                val currentDate = selectedCal.get(Calendar.DAY_OF_MONTH)
+
+                if (currentDate == today && timeMillis >= System.currentTimeMillis()) {
+                    mentoringTimeMillis.value = timeMillis
+                    _mentoringTime.value = mentoringTimeMillis.value.withTimeFormat()
+                } else if (currentDate > today) {
+                    mentoringTimeMillis.value = timeMillis
+                    _mentoringTime.value = mentoringTimeMillis.value.withTimeFormat()
+                }
             }
         }
     }
@@ -70,6 +103,21 @@ class CreateMentoringViewModel @Inject constructor(
 
     fun onMentoringTypeSelected(mentoringType: String) {
         _mentoringType.value = mentoringType
-        Log.d(CreateMentoringViewModel::class.simpleName, _mentoringType.value)
+    }
+
+    fun createMentoringSession() = viewModelScope.launch {
+        menteeId?.let {
+            val addMentoring = AddMentoringSession(
+                menteeId = it,
+                mentorId = mentorId,
+                title = _title.value,
+                description = _description.value,
+                mentoringTime = mentoringTimeMillis.value,
+                mentoringDate = mentoringDateMillis.value,
+                isOnlyChat = _mentoringType.value == context.getString(R.string.chat)
+            )
+            mentoringRepository.createMentoring(addMentoring)
+            _isCreateMentoringSuccess.value = true
+        }
     }
 }

@@ -5,7 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dev.cisnux.dicodingmentoring.data.services.MentorService
-import dev.cisnux.dicodingmentoring.utils.BASE_URL
+import dev.cisnux.dicodingmentoring.utils.HTTP_BASE_URL
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -22,7 +22,7 @@ object MentorServiceModule {
         moshiConverter: MoshiConverterFactory,
     ): MentorService {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(HTTP_BASE_URL)
             .addConverterFactory(moshiConverter)
             .client(client)
             .build()

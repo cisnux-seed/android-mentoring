@@ -71,9 +71,11 @@ fun CreateMentoringScreen(
     mainViewModel: MainViewModel,
     modifier: Modifier = Modifier,
     navigateUp: () -> Unit,
+    navigateToMentoring: () -> Unit,
     createMentoringViewModel: CreateMentoringViewModel = hiltViewModel(),
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
+    val navigateToMentoringState by rememberUpdatedState(navigateToMentoring)
     LaunchedEffect(Unit) {
         oneTimeUpdateState(false)
     }
@@ -83,8 +85,15 @@ fun CreateMentoringScreen(
     val mentoringDate by createMentoringViewModel.mentoringDate
     val mentoringTime by createMentoringViewModel.mentoringTime
     val coroutineScope = rememberCoroutineScope()
-    val snackbarHostState = remember{
+    val snackbarHostState = remember {
         SnackbarHostState()
+    }
+    val isCreateMentoringSuccess by createMentoringViewModel.isCreateMentoringSuccess
+
+    if (isCreateMentoringSuccess) {
+        LaunchedEffect(Unit){
+            navigateToMentoringState()
+        }
     }
 
     CreateMentoringContent(
@@ -100,7 +109,7 @@ fun CreateMentoringScreen(
                 mentoringType = mentoringType,
                 radioTitles = listOf(
                     stringResource(id = R.string.chat),
-                    stringResource(id = R.string.meet)
+                    stringResource(id = R.string.video_chat)
                 ),
                 onMentoringDateChanged = createMentoringViewModel::onMentoringDateChanged,
                 mentoringDate = mentoringDate,
@@ -108,33 +117,34 @@ fun CreateMentoringScreen(
                 mentoringTime = mentoringTime,
                 onMentoringTimeChanged = createMentoringViewModel::onMentoringTimeChanged,
                 onCrateMentoring = {
-                    if(title.isBlank()){
+                    if (title.isBlank()) {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("the problem title must be filled")
                         }
                         return@CreateMentoringBody
                     }
 
-                    if(description.isBlank()){
+                    if (description.isBlank()) {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("the description must be filled")
                         }
                         return@CreateMentoringBody
                     }
 
-                    if(mentoringDate.isBlank()){
+                    if (mentoringDate.isBlank()) {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("the mentoring date must be filled with correct date")
                         }
                         return@CreateMentoringBody
                     }
 
-                    if(mentoringTime.isBlank()){
+                    if (mentoringTime.isBlank()) {
                         coroutineScope.launch {
                             snackbarHostState.showSnackbar("the mentoring time be filled with correct date")
                         }
                         return@CreateMentoringBody
                     }
+                    createMentoringViewModel.createMentoringSession()
                 }
             )
         },
@@ -162,7 +172,7 @@ fun CreateMentoringContentPreview() {
                         onMentoringDateChanged = {},
                         radioTitles = listOf(
                             stringResource(id = R.string.chat),
-                            stringResource(id = R.string.meet)
+                            stringResource(id = R.string.video_chat)
                         ),
                         mentoringTime = "",
                         onMentoringTimeChanged = {},
@@ -192,11 +202,11 @@ fun CreateMentoringBody(
     onCrateMentoring: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var openDateDialog by remember { mutableStateOf(false) }
-    var showTimePicker by remember { mutableStateOf(false) }
-    val showingPicker = remember { mutableStateOf(true) }
+    var openDatePickerDialog by remember { mutableStateOf(false) }
+    var openTimePickerDialog by remember { mutableStateOf(false) }
     val configuration = LocalConfiguration.current
-    val state = rememberTimePickerState()
+    val timePickerState = rememberTimePickerState()
+    val showingTimePicker = remember { mutableStateOf(true) }
 
     Column(
         horizontalAlignment = Alignment.Start,
@@ -244,7 +254,7 @@ fun CreateMentoringBody(
             },
             leadingIcon = {
                 IconButton(onClick = {
-                    openDateDialog = true
+                    openDatePickerDialog = true
                 }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_date_24),
@@ -258,7 +268,7 @@ fun CreateMentoringBody(
                 disabledBorderColor = MaterialTheme.colorScheme.onBackground,
             ),
         )
-        if (openDateDialog) {
+        if (openDatePickerDialog) {
             val datePickerState = rememberDatePickerState()
             val confirmEnabled = remember {
                 derivedStateOf { datePickerState.selectedDateMillis != null }
@@ -266,12 +276,12 @@ fun CreateMentoringBody(
 
             DatePickerDialog(
                 onDismissRequest = {
-                    openDateDialog = false
+                    openDatePickerDialog = false
                 },
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            openDateDialog = false
+                            openDatePickerDialog = false
                             onMentoringDateChanged(datePickerState.selectedDateMillis)
                         },
                         enabled = confirmEnabled.value
@@ -282,7 +292,7 @@ fun CreateMentoringBody(
                 dismissButton = {
                     TextButton(
                         onClick = {
-                            openDateDialog = false
+                            openDatePickerDialog = false
                         }
                     ) {
                         Text("Cancel")
@@ -303,9 +313,11 @@ fun CreateMentoringBody(
                 Text(text = "Select the time for mentoring")
             },
             leadingIcon = {
-                IconButton(onClick = {
-                    showTimePicker = true
-                }) {
+                IconButton(
+                    enabled = mentoringDate.isNotBlank(),
+                    onClick = {
+                        openTimePickerDialog = true
+                    }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_time_24),
                         contentDescription = "select date mentoring"
@@ -318,21 +330,21 @@ fun CreateMentoringBody(
                 disabledBorderColor = MaterialTheme.colorScheme.onBackground,
             ),
         )
-        if (showTimePicker) {
+        if (openTimePickerDialog) {
             TimePickerDialog(
-                title = if (showingPicker.value) {
+                title = if (showingTimePicker.value) {
                     "Select Time "
                 } else {
                     "Enter Time"
                 },
-                onCancel = { showTimePicker = false },
+                onCancel = { openTimePickerDialog = false },
                 onConfirm = {
                     val cal = Calendar.getInstance()
-                    cal.set(Calendar.HOUR_OF_DAY, state.hour)
-                    cal.set(Calendar.MINUTE, state.minute)
+                    cal.set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                    cal.set(Calendar.MINUTE, timePickerState.minute)
                     cal.isLenient = false
                     onMentoringTimeChanged(cal.timeInMillis)
-                    showTimePicker = false
+                    openTimePickerDialog = false
                 },
                 toggle = {
                     if (configuration.screenHeightDp > 400) {
@@ -355,9 +367,9 @@ fun CreateMentoringBody(
                                     .size(64.dp, 72.dp)
                                     .align(Alignment.BottomStart)
                                     .zIndex(5f),
-                                onClick = { showingPicker.value = !showingPicker.value }) {
+                                onClick = { showingTimePicker.value = !showingTimePicker.value }) {
                                 val icon = painterResource(
-                                    id = if (showingPicker.value) {
+                                    id = if (showingTimePicker.value) {
                                         R.drawable.ic_keyboard_24
                                     } else {
                                         R.drawable.ic_schedule_24
@@ -365,7 +377,7 @@ fun CreateMentoringBody(
                                 )
                                 Icon(
                                     painter = icon,
-                                    contentDescription = if (showingPicker.value) {
+                                    contentDescription = if (showingTimePicker.value) {
                                         "Switch to Text Input"
                                     } else {
                                         "Switch to Touch Input"
@@ -376,10 +388,10 @@ fun CreateMentoringBody(
                     }
                 }
             ) {
-                if (showingPicker.value && configuration.screenHeightDp > 400) {
-                    TimePicker(state = state)
+                if (showingTimePicker.value && configuration.screenHeightDp > 400) {
+                    TimePicker(state = timePickerState)
                 } else {
-                    TimeInput(state = state)
+                    TimeInput(state = timePickerState)
                 }
             }
         }

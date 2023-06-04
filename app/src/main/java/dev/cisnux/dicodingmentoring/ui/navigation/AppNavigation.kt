@@ -15,6 +15,7 @@ object AppDestinations {
     const val FAVORITE_MENTOR_ROUTE = "favoritementor"
     const val MENTOR_DETAIL_ROUTE = "mentordetail/{id}"
     const val MATCHMAKING_ROUTE = "matchmaking"
+    const val MENTORING_ROUTE = "mentoring"
     const val CREATE_MENTORING_ROUTE = "creatementoring/{id}"
     const val MY_PROFILE_ROUTE = "myprofile"
     const val ADD_MENTOR_ROUTE = "addmentor/{id}"
@@ -35,6 +36,16 @@ class AppNavigationActions(
     }
     val navigateToRegister: () -> Unit = {
         navController.navigate(AppDestinations.REGISTER_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            restoreState = true
+            launchSingleTop = true
+        }
+    }
+    val navigateToMentoring: () -> Unit = {
+        navController.popBackStack(route = AppDestinations.HOME_ROUTE, inclusive = true)
+        navController.navigate(AppDestinations.MENTORING_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

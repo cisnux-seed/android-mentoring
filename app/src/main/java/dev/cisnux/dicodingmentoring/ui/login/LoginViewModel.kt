@@ -1,6 +1,5 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -40,7 +39,6 @@ class LoginViewModel @Inject constructor(
         val result = repository.signInWithEmailAndPassword(authUser)
         result.fold(
             {
-                Log.d("LoginViewModel", it.message ?: "no message")
                 _loginState.value = UiState.Error(it)
             },
             {
@@ -50,7 +48,6 @@ class LoginViewModel @Inject constructor(
     }
 
     fun googleSignIn(token: String?) = viewModelScope.launch {
-        Log.d("Google sign in", "login")
         _loginState.value = UiState.Initialize
         val result = repository.signInWithGoogle(token)
         result.fold(

@@ -5,7 +5,8 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-const val BASE_URL = "https://www.mentoring.cisnux.xyz/"
+const val HTTP_BASE_URL = "https://www.mentoring.cisnux.xyz/"
+const val WS_BASE_URL = "wss://www.mentoring.cisnux.xyz/ws/"
 
 fun String.isEmail(): Boolean {
     val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\$"
@@ -16,7 +17,9 @@ fun String.isPasswordSecure(): Boolean = this.trim().length >= 8
 
 fun String.isValidAbout(maxLength: Int) = length <= maxLength
 
-fun String.asList() = replace("[^\\S\r\n]+".toRegex(), "").split("\n")
+fun String.asList(): List<String> = trimIndent()
+    .lines().map { it.trim() }
+    .filter { it.isNotBlank() }
 
 fun Long.withDateFormat(): String {
     val date = Date(this)
@@ -25,6 +28,6 @@ fun Long.withDateFormat(): String {
 
 fun Long.withTimeFormat(): String {
     val date = Date(this)
-    val formatter = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return formatter.format(date)
+    return SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())
+        .format(date)
 }

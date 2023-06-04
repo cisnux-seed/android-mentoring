@@ -136,6 +136,7 @@ fun MainAppContent(
 ) {
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = drawerState.isOpen,
         drawerContent = {
             ModalDrawerSheet(
                 drawerShape = MaterialTheme.shapes.extraSmall
@@ -180,7 +181,6 @@ fun MainAppContent(
                     visible = shouldBottomBarOpen
                 ) {
                     BottomBar(currentRoute = currentRoute, onSelected = { destination ->
-                        navController.popBackStack()
                         navController.navigate(destination) {
                             popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
@@ -220,10 +220,10 @@ private fun BottomBar(
                 contentDescription = stringResource(R.string.home_page)
             ),
             PainterBottomNavigationItem(
-                title = stringResource(R.string.menu_mentorship),
+                title = stringResource(R.string.menu_mentoring),
                 icon = painterResource(id = R.drawable.ic_event_available_24),
-                destination = AppDestinations.HOME_ROUTE,
-                contentDescription = stringResource(R.string.mentorship_page)
+                destination = AppDestinations.MENTORING_ROUTE,
+                contentDescription = stringResource(R.string.mentoring_page)
             ),
             PainterBottomNavigationItem(
                 title = stringResource(R.string.chat_menu),
@@ -341,9 +341,8 @@ fun NavigationDrawerItems(
     }
 
     BackHandler(drawerState.isOpen) {
-        if (drawerState.isOpen)
-            coroutineScope.launch {
-                drawerState.close()
-            }
+        coroutineScope.launch {
+            drawerState.close()
+        }
     }
 }

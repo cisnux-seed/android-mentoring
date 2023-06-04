@@ -4,6 +4,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -17,6 +18,8 @@ import dev.cisnux.dicodingmentoring.ui.matchmentoring.MatchMakingScreen
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
 import dev.cisnux.dicodingmentoring.ui.mentordetail.MentorDetailScreen
+import dev.cisnux.dicodingmentoring.ui.mentoring.MentoringScreen
+import dev.cisnux.dicodingmentoring.ui.mentoring.MentoringViewModel
 import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileScreen
 import dev.cisnux.dicodingmentoring.ui.register.RegisterScreen
 import dev.cisnux.dicodingmentoring.ui.registerprofile.RegisterProfileScreen
@@ -31,6 +34,7 @@ fun AppNavGraph(
     modifier: Modifier = Modifier,
 ) {
     val authSession by mainViewModel.authSession.collectAsStateWithLifecycle()
+    val mentoringViewModel:MentoringViewModel = hiltViewModel()
 
     authSession?.let { isSessionExist ->
         val startDestination = if (isSessionExist) AppDestinations.HOME_ROUTE
@@ -74,6 +78,14 @@ fun AppNavGraph(
                     navigateToDetailMentor = navigationActions.navigateToDetailMentor,
                     drawerState = drawerState,
                     navigateToMatchmaking = navigationActions.navigateToMatchmaking
+                )
+            }
+            composable(
+                route = AppDestinations.MENTORING_ROUTE
+            ) {
+                MentoringScreen(
+                    mainViewModel = mainViewModel,
+                    mentoringViewModel = mentoringViewModel
                 )
             }
             composable(
@@ -127,6 +139,7 @@ fun AppNavGraph(
             ) {
                 CreateMentoringScreen(
                     navigateUp = navigationActions.navigateUp,
+                    navigateToMentoring = navigationActions.navigateToMentoring,
                     mainViewModel = mainViewModel,
                 )
             }

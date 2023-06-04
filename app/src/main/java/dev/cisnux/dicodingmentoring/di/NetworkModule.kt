@@ -1,5 +1,4 @@
 package dev.cisnux.dicodingmentoring.di
-import com.google.firebase.ktx.BuildConfig
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

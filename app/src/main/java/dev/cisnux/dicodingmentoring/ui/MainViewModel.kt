@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
+import dev.cisnux.dicodingmentoring.domain.repositories.MentoringRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val mentoringRepository: MentoringRepository
 ) : ViewModel() {
     private val _authSession = MutableStateFlow<Boolean?>(null)
     val authSession get() = _authSession.asStateFlow()
@@ -40,10 +42,11 @@ class MainViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _authSession.value = authRepository.getAuthSession(currentUserId.first() ?: "").first()
-            // close bottom bar when there is no auth session
             if (_authSession.value != true) {
+                // invalidate all previous authentications
                 authRepository.logout()
             } else {
+                // close bottom bar when there is no auth session
                 _shouldBottomBarOpen.value = true
             }
         }
@@ -52,7 +55,15 @@ class MainViewModel @Inject constructor(
     fun logout() = viewModelScope.launch {
         _authSession.value = false
         currentUserId.first()?.let { id ->
+            mentoringRepository.closeSocketSessions()
             authRepository.logout(id)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            mentoringRepository.closeSocketSessions()
         }
     }
 }

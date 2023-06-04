@@ -1,7 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -132,7 +131,6 @@ fun LoginScreen(
         is UiState.Error -> {
             (loginState as UiState.Error).error?.let { exception ->
                 if (exception is Failure.NotFoundFailure) {
-                    Log.d("LoginScreen", currentUserId ?: "no id")
                     currentUserId?.let(navigateToRegisterProfile)
                 } else {
                     LaunchedEffect(snackbarHostState) {

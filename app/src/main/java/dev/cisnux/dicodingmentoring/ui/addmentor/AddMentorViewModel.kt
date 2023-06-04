@@ -2,7 +2,6 @@ package dev.cisnux.dicodingmentoring.ui.addmentor
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -25,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddMentorViewModel @Inject constructor(
     @ApplicationContext appContext: Context,
-    private val repository: UserRepository,
+    private val userRepository: UserRepository,
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(appContext as Application) {
     private val context = getApplication<DicodingMentoringApplication>()
@@ -123,7 +122,6 @@ class AddMentorViewModel @Inject constructor(
     }
 
     fun onJoin() = viewModelScope.launch {
-        Log.d(AddMentorViewModel::class.simpleName, id)
         val addMentor = AddMentor(
             id = id,
             expertises = _mentoringForms.map {
@@ -135,7 +133,7 @@ class AddMentorViewModel @Inject constructor(
                 )
             }
         )
-        val result = repository.addMentorProfile(addMentor = addMentor)
+        val result = userRepository.addMentorProfile(addMentor = addMentor)
         result.fold({
             _addMentorState.value = UiState.Error(it)
         }, {
