@@ -2,10 +2,10 @@ package dev.cisnux.dicodingmentoring.ui.findmentor
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -33,13 +35,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import arrow.core.left
 import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import java.util.Calendar
@@ -47,7 +49,7 @@ import java.util.Calendar
 @Composable
 fun FindMentorScreen() {
     Column(modifier = Modifier
-        .fillMaxSize()
+        .fillMaxSize(),
     ) {
         Box(modifier = Modifier
             .fillMaxWidth()
@@ -64,6 +66,10 @@ fun FindMentorScreen() {
             SelectLearningPath()
             Spacer(modifier = Modifier.height(24.dp))
             SelectedCourse()
+            Spacer(modifier = Modifier.height(24.dp))
+            ProblemItem()
+            Spacer(modifier = Modifier.height(28.dp))
+            FindMentorButton()
         }
     }
 }
@@ -129,6 +135,7 @@ fun SelectLearningPath() {
                     .menuAnchor()
                     .fillMaxWidth(),
                 readOnly = true,
+                label = {Text("Choose Learning Path")},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 supportingText = {
                     if (selectedLearningPath.isEmpty())
@@ -184,6 +191,7 @@ fun SelectedCourse() {
                     .menuAnchor()
                     .fillMaxWidth(),
                 readOnly = true,
+                label = {Text("Choose Course")},
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isExpanded) },
                 supportingText = {
                     if (selectedCourseItem.isEmpty())
@@ -214,6 +222,59 @@ fun SelectedCourse() {
                         }
                     )
                 }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ProblemItem() {
+    val text: String by rememberSaveable {
+        mutableStateOf("")
+    }
+    Box(modifier = Modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = {},
+            label = {Text("Problem")},
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+                disabledBorderColor = MaterialTheme.colorScheme.primary,
+            ),
+        )
+    }
+}
+
+@Composable
+fun FindMentorButton() {
+    Box(
+        modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth()
+    ) {
+        Button(
+            onClick = {},
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.Center)
+                .size(width = 180.dp, height = 60.dp)
+                .clip(RoundedCornerShape(24.dp)),
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_hourglass),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Find Mentor",
+                    fontSize = 16.sp
+                )
             }
         }
     }
