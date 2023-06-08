@@ -1,5 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.mentoring
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -10,6 +11,7 @@ import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.domain.repositories.MentoringRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -25,18 +27,24 @@ class MentoringViewModel @Inject constructor(
     val getMentoringSessions: StateFlow<List<GetMentoringSession>>
         get() = _getMentoringSessions
 
-    init {
-        viewModelScope.launch {
-            authRepository.currentUser().collectLatest {
-                it.uid?.let { id ->
-                    if (id.isNotBlank()) {
-                        mentoringRepository.getMentoringSessions(id)
-                            .collectLatest { mentoringSessions ->
-                                _getMentoringSessions.value = mentoringSessions
-                            }
-                    }
+    fun subscribeMentoringSessions() = viewModelScope.launch {
+        authRepository.currentUser().catch {
+            _showConnectionError.value = true
+        }.collectLatest {
+            it.uid?.let { id ->
+                Log.d("onInit", "init ${id.isNotBlank()}")
+                if (id.isNotBlank()) {
+                    mentoringRepository.getMentoringSessions(id)
+                        .collectLatest { mentoringSessions ->
+                            _getMentoringSessions.value = mentoringSessions
+                        }
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        Log.d("onCleared", "clear mentoring view model")
+        super.onCleared()
     }
 }

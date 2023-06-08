@@ -8,7 +8,6 @@ data class CreateRealtimeMentoring(
     val menteeId: String,
     val title: String,
     val description: String,
-    val mentoringDate: Long,
-    val mentoringTime: Long,
     val isOnlyChat: Boolean,
+    val eventTime: Long,
 )

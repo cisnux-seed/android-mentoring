@@ -50,19 +50,21 @@ import dev.cisnux.dicodingmentoring.utils.withTimeFormat
 fun MentoringScreen(
     mainViewModel: MainViewModel,
     mentoringViewModel: MentoringViewModel,
+    navigateToDetailMentoring: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
     LaunchedEffect(Unit) {
         oneTimeUpdateState(true)
     }
+    mentoringViewModel.subscribeMentoringSessions()
     val snackbarHostState = remember {
         SnackbarHostState()
     }
     val showConnectionError by mentoringViewModel.showConnectionError
     val mentoringSessions by mentoringViewModel.getMentoringSessions.collectAsStateWithLifecycle()
 
-    if(showConnectionError) {
+    if (showConnectionError) {
         LaunchedEffect(snackbarHostState) {
             snackbarHostState.showSnackbar(
                 "no internet connection"
@@ -73,7 +75,8 @@ fun MentoringScreen(
     MentoringContent(snackbarHostState = snackbarHostState, body = { innerPadding ->
         MentoringBody(
             mentoringSessions = mentoringSessions,
-            modifier = modifier.padding(innerPadding)
+            modifier = modifier.padding(innerPadding),
+            navigateToDetailMentoring = navigateToDetailMentoring
         )
     })
 }
@@ -90,62 +93,56 @@ fun MentoringContentPreview() {
                         mentoringSessions = listOf(
                             GetMentoringSession(
                                 id = "a123",
-                                title = "Hilt pada Jetpack Compose",
+                                title = "Hilt pada Jetpack Compose aaaaaaaaaaaaaaaw",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                             GetMentoringSession(
                                 id = "a123",
                                 title = "Hilt pada Jetpack Compose",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                             GetMentoringSession(
                                 id = "a123",
                                 title = "Hilt pada Jetpack Compose",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                             GetMentoringSession(
                                 id = "a123",
                                 title = "Hilt pada Jetpack Compose",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                             GetMentoringSession(
                                 id = "a123",
                                 title = "Hilt pada Jetpack Compose",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                             GetMentoringSession(
                                 id = "a123",
                                 title = "Hilt pada Jetpack Compose",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                             GetMentoringSession(
                                 id = "a123",
                                 title = "Hilt pada Jetpack Compose",
                                 description = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vestibulum dolor a fringilla eleifend. Curabitur at sagittis nisl. In venenatis euismod odio sed suscipit. Integer ullamcorper tortor vitae tellus fermentum, a consequat odio pellentesque. Mauris et mauris at felis tristique accumsan.",
-                                mentoringDate = 1788692032000,
-                                mentoringTime = 1788692032000,
+                                eventTime = 1788692032000,
                                 isOnlyChat = false
                             ),
                         ),
-                        modifier = Modifier.padding(innerPadding)
+                        navigateToDetailMentoring = {},
+                        modifier = Modifier.padding(innerPadding),
                     )
                 }
             )
@@ -163,7 +160,8 @@ fun MentoringContentPreviewWhenEmpty() {
                 body = { innerPadding ->
                     MentoringBody(
                         mentoringSessions = emptyList(),
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding),
+                        navigateToDetailMentoring = {}
                     )
                 }
             )
@@ -198,6 +196,7 @@ fun MentoringContent(
 @Composable
 fun MentoringBody(
     mentoringSessions: List<GetMentoringSession>,
+    navigateToDetailMentoring: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     if (mentoringSessions.isEmpty()) {
@@ -225,13 +224,14 @@ fun MentoringBody(
             content = {
                 items(mentoringSessions) { mentoringSession ->
                     MentoringCard(
-                        id = mentoringSession.id,
                         title = mentoringSession.title,
                         description = mentoringSession.description,
-                        mentoringDate = mentoringSession.mentoringDate.withDateFormat(),
-                        mentoringTime = mentoringSession.mentoringTime.withTimeFormat(),
+                        mentoringDate = mentoringSession.eventTime.withDateFormat(),
+                        mentoringTime = mentoringSession.eventTime.withTimeFormat(),
                         isOnlyChat = mentoringSession.isOnlyChat,
-                        onClick = {}
+                        onClick = {
+                            navigateToDetailMentoring(mentoringSession.id)
+                        }
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -245,7 +245,6 @@ fun MentoringBody(
 fun MentoringCardPreview() {
     DicodingMentoringTheme {
         MentoringCard(
-            id = "123",
             title = "Hilt pada Jetpack Compose",
             description = "saya ingin mengunnakan hilt pada jetpack compose",
             mentoringDate = "Sabtu, 27 Januari 2023",
@@ -258,13 +257,12 @@ fun MentoringCardPreview() {
 
 @Composable
 fun MentoringCard(
-    id: String,
     title: String,
     description: String,
     mentoringDate: String,
     mentoringTime: String,
     isOnlyChat: Boolean,
-    onClick: (String) -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     ElevatedCard(
@@ -272,9 +270,7 @@ fun MentoringCard(
         modifier = modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.small)
-            .clickable(onClick = {
-                onClick(id)
-            })
+            .clickable(onClick = onClick)
     ) {
         Column(
             modifier = Modifier.padding(8.dp)
@@ -288,14 +284,16 @@ fun MentoringCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(7f)
                 )
                 Icon(
                     painter = painterResource(
                         id = if (isOnlyChat) R.drawable.ic_chat_24
                         else R.drawable.ic_video_chat_24
                     ),
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier.weight(1f)
                 )
             }
             Spacer(modifier = Modifier.height(4.dp))

@@ -2,6 +2,8 @@ package dev.cisnux.dicodingmentoring.ui.home
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -46,6 +48,7 @@ import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.domain.models.GetMentor
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.components.MentorCard
+import dev.cisnux.dicodingmentoring.ui.components.RequestNotificationDialog
 import dev.cisnux.dicodingmentoring.ui.components.SearchBarButton
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import dev.cisnux.dicodingmentoring.utils.UiState
@@ -70,6 +73,16 @@ fun HomeScreen(
     }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = {}
+    )
+    RequestNotificationDialog(
+        context = context,
+        snackbarHostState = snackbarHostState,
+        coroutineScope = coroutineScope,
+        launcher = launcher
+    )
     var expanded by remember { mutableStateOf(false) }
     val mentorsState by homeViewModel.mentorsState
     val currentUser by homeViewModel.currentUser.collectAsStateWithLifecycle(null)
@@ -166,77 +179,77 @@ fun HomeContentPreview() {
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
                             GetMentor(
                                 id = "1",
                                 fullName = "Eren Jaeger",
-                                photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                                photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                                 averageRating = 3.0,
                                 job = "Front-End Developer"
                             ),
@@ -305,63 +318,63 @@ fun HomeBodyPreview() {
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
                     GetMentor(
                         id = "1",
                         fullName = "Eren Jaeger",
-                        photoProfileUrl = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
+                        photoProfile = "https://upload.wikimedia.org/wikipedia/it/a/a7/Eren_jaeger.png",
                         averageRating = 3.0,
                         job = "Front-End Developer"
                     ),
@@ -413,7 +426,7 @@ fun HomeBody(
                 items(mentors) { mentor ->
                     MentorCard(
                         fullName = mentor.fullName,
-                        photoProfile = mentor.photoProfileUrl,
+                        photoProfile = mentor.photoProfile,
                         job = mentor.job,
                         averageRating = mentor.averageRating,
                         context = context,

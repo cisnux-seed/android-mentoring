@@ -13,12 +13,15 @@ object AppDestinations {
     const val HOME_ROUTE = "home"
     const val REGISTER_PROFILE_ROUTE = "registerprofile/{id}"
     const val FAVORITE_MENTOR_ROUTE = "favoritementor"
-    const val MENTOR_DETAIL_ROUTE = "mentordetail/{id}"
+    const val DETAIL_MENTOR_ROUTE = "detailmentor/{id}"
     const val MATCHMAKING_ROUTE = "matchmaking"
     const val MENTORING_ROUTE = "mentoring"
+    const val DETAIL_MENTORING_ROUTE = "mentoring/{mentoringId}"
     const val CREATE_MENTORING_ROUTE = "creatementoring/{id}"
     const val MY_PROFILE_ROUTE = "myprofile"
     const val ADD_MENTOR_ROUTE = "addmentor/{id}"
+    const val CHAT_ROOM_ROUTE =
+        "chat?roomChatId={roomChatId}&fullName={fullName}&email={email}&photoProfile={photoProfile}"
 }
 
 class AppNavigationActions(
@@ -28,12 +31,11 @@ class AppNavigationActions(
         navController.popBackStack()
         navController.navigate(AppDestinations.LOGIN_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                inclusive = true
             }
-            restoreState = true
-            launchSingleTop = true
         }
     }
+
     val navigateToRegister: () -> Unit = {
         navController.navigate(AppDestinations.REGISTER_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
@@ -44,10 +46,9 @@ class AppNavigationActions(
         }
     }
     val navigateToMentoring: () -> Unit = {
-        navController.popBackStack(route = AppDestinations.HOME_ROUTE, inclusive = true)
         navController.navigate(AppDestinations.MENTORING_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+            popUpTo(AppDestinations.HOME_ROUTE) {
+                inclusive = true
             }
             restoreState = true
             launchSingleTop = true
@@ -72,10 +73,23 @@ class AppNavigationActions(
         }
     }
     val navigateToDetailMentor: (id: String) -> Unit = { id ->
-        navController.navigate("mentordetail/$id")
+        navController.navigate("detailmentor/$id")
     }
+    val navigateToDetailMentoring: (mentoringId: String) -> Unit = { mentoringId ->
+        navController.navigate("mentoring/$mentoringId")
+    }
+    val navigateToRoomChat: (roomChatId: String, fullName: String, email: String, photoProfile: String?) -> Unit =
+        { roomChatId, fullName, email, photoProfile ->
+            navController.navigate(
+                "chat?roomChatId=$roomChatId&fullName=$fullName&email=$email${
+                    photoProfile?.let {
+                        "&photoProfile=$it"
+                    } ?: ""
+                }"
+            )
+        }
     val navigateToMatchmaking: () -> Unit = {
-        navController.navigate("matchmaking")
+        navController.navigate(AppDestinations.MATCHMAKING_ROUTE)
     }
     val navigateToCreateMentoring: (id: String) -> Unit = { id ->
         navController.navigate("creatementoring/$id")
@@ -93,20 +107,25 @@ class AppNavigationActions(
         navController.popBackStack()
         navController.navigate("registerprofile/$id") {
             popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+                inclusive = true
+            }
+            launchSingleTop = true
+        }
+    }
+    val navigateToHome: () -> Unit = {
+        navController.navigate(AppDestinations.HOME_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                inclusive = true
             }
             restoreState = true
             launchSingleTop = true
         }
     }
-    val navigateToHome: () -> Unit = {
-        navController.popBackStack()
+    val navigateToHomeForLogin: () -> Unit = {
         navController.navigate(AppDestinations.HOME_ROUTE) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
+            popUpTo(AppDestinations.LOGIN_ROUTE) {
+                inclusive = true
             }
-            restoreState = true
-            launchSingleTop = true
         }
     }
     val navigateUp: () -> Unit = {

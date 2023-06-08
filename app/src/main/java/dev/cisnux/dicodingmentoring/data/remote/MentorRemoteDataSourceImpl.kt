@@ -2,7 +2,7 @@ package dev.cisnux.dicodingmentoring.data.remote
 
 import dev.cisnux.dicodingmentoring.data.services.MentorDetailResponse
 import dev.cisnux.dicodingmentoring.data.services.MentorListResponse
-import dev.cisnux.dicodingmentoring.data.services.MentorRequestBody
+import dev.cisnux.dicodingmentoring.data.services.MentorBodyRequest
 import dev.cisnux.dicodingmentoring.data.services.MentorService
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ class MentorRemoteDataSourceImpl @Inject constructor(
     override suspend fun getMentorProfileById(id: String): MentorDetailResponse =
         service.getMentorProfileById(id)
 
-    override suspend fun addMentorProfile(id: String, mentor: MentorRequestBody): Unit =
+    override suspend fun addMentorProfile(id: String, mentor: MentorBodyRequest): Unit =
         service.postMentorProfile(id, mentor)
 
     override suspend fun getMentors(

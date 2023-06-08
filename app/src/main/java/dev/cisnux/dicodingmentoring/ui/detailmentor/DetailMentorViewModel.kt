@@ -1,4 +1,4 @@
-package dev.cisnux.dicodingmentoring.ui.mentordetail
+package dev.cisnux.dicodingmentoring.ui.detailmentor
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class MentorDetailViewModel @Inject constructor(
+class DetailMentorViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val userRepository: UserRepository
 ) : ViewModel() {

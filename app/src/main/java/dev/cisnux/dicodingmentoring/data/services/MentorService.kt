@@ -10,7 +10,7 @@ interface MentorService {
     @POST("mentors/{id}")
     suspend fun postMentorProfile(
         @Path("id") id: String,
-        @Body mentorRequestBody: MentorRequestBody
+        @Body mentorBodyRequest: MentorBodyRequest
     )
 
     @GET("mentors/{id}")

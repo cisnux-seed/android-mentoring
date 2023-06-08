@@ -4,6 +4,13 @@ import kotlinx.coroutines.flow.Flow
 
 interface RealtimeMentoringDataSource {
     fun getRealtimeMentoringSessions(userId: String): Flow<List<GetRealtimeMentoring>>
+
     suspend fun createRealtimeMentoring(createRealtimeMentoring: CreateRealtimeMentoring)
-    suspend fun close()
+    fun getRealtimeDetailMentoring(
+        userId: String,
+        mentoringId: String
+    ): Flow<GetRealtimeDetailMentoring>
+    suspend fun acceptMentoring(acceptMentoring: AcceptMentoring)
+    suspend fun closeDetailMentoringSocket()
+    suspend fun closeMentoringSocket()
 }

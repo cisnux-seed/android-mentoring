@@ -32,7 +32,6 @@ class LoginViewModel @Inject constructor(
     private val _password = mutableStateOf("")
     val password: State<String> get() = _password
 
-
     fun loginWithEmailAndPassword() = viewModelScope.launch {
         _loginState.value = UiState.Loading
         val authUser = AuthUser(email = _email.value, password = _password.value)

@@ -9,13 +9,12 @@ data class GetRealtimeMentoring(
     val title: String,
     val description: String,
     val isOnlyChat: Boolean,
-    val mentoringDate: Long,
-    val mentoringTime: Long
+    val eventTime: Long,
 )
 
 fun List<GetRealtimeMentoring>.asGetMentoringSessions() =
-    map { (id, title, description, isOnlyChat, mentoringDate, mentoringTime) ->
+    map { (id, title, description, isOnlyChat, eventTime) ->
         GetMentoringSession(
-            id, title, description, isOnlyChat, mentoringDate, mentoringTime
+            id, title, description, isOnlyChat, eventTime
         )
     }

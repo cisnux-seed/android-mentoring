@@ -27,8 +27,8 @@ data class MenteeProfileData(
     @Json(name = "username")
     val username: String,
 
-    @Json(name = "photoProfileUrl")
-    val photoProfileUrl: String? = null,
+    @Json(name = "photoProfile")
+    val photoProfile: String? = null,
 
     @Json(name = "about")
     val about: String,

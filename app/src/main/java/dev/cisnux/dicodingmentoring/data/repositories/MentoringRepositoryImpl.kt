@@ -1,5 +1,7 @@
 package dev.cisnux.dicodingmentoring.data.repositories
 
+import dev.cisnux.dicodingmentoring.data.realtime.AcceptMentoring
+import dev.cisnux.dicodingmentoring.data.realtime.GetRealtimeDetailMentoring
 import dev.cisnux.dicodingmentoring.data.realtime.RealtimeMentoringDataSource
 import dev.cisnux.dicodingmentoring.data.realtime.asGetMentoringSessions
 import dev.cisnux.dicodingmentoring.domain.models.AddMentoringSession
@@ -22,5 +24,19 @@ class MentoringRepositoryImpl @Inject constructor(
         dataSource.createRealtimeMentoring(addMentoringSession.asCreateRealtimeMentoring())
 
     override suspend fun closeSocketSessions() =
-        dataSource.close()
+        dataSource.closeMentoringSocket()
+
+    override fun getRealtimeDetailMentoring(
+        userId: String,
+        mentoringId: String
+    ): Flow<GetRealtimeDetailMentoring> = dataSource.getRealtimeDetailMentoring(userId, mentoringId)
+
+    override suspend fun acceptMentoring(acceptMentoring: AcceptMentoring) =
+        dataSource.acceptMentoring(acceptMentoring)
+
+    override suspend fun closeDetailMentoringSocket() {
+        TODO("Not yet implemented")
+    }
+
+
 }

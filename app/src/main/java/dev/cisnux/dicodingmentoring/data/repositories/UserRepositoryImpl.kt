@@ -5,7 +5,7 @@ import dev.cisnux.dicodingmentoring.data.remote.MenteeRemoteDataSource
 import dev.cisnux.dicodingmentoring.data.remote.MentorRemoteDataSource
 import dev.cisnux.dicodingmentoring.data.services.ExpertisesItem
 import dev.cisnux.dicodingmentoring.data.services.FileService
-import dev.cisnux.dicodingmentoring.data.services.MentorRequestBody
+import dev.cisnux.dicodingmentoring.data.services.MentorBodyRequest
 import dev.cisnux.dicodingmentoring.data.services.asExpertises
 import dev.cisnux.dicodingmentoring.data.services.asGetMentors
 import dev.cisnux.dicodingmentoring.domain.models.AddMentor
@@ -42,7 +42,7 @@ class UserRepositoryImpl @Inject constructor(
                     else emptyList()
                 val getUserProfile = GetUserProfile(
                     id = userProfileResponse.id,
-                    photoProfileUrl = userProfileResponse.photoProfileUrl,
+                    photoProfile = userProfileResponse.photoProfile,
                     fullName = userProfileResponse.fullName,
                     username = userProfileResponse.username,
                     email = userProfileResponse.email,
@@ -74,7 +74,7 @@ class UserRepositoryImpl @Inject constructor(
                 val expertises: List<ExpertisesItem> = mentorRemoteDataSource.getMentorProfileById(id).data.expertises
                 val getUserProfile = GetUserProfile(
                     id = userProfileResponse.id,
-                    photoProfileUrl = userProfileResponse.photoProfileUrl,
+                    photoProfile = userProfileResponse.photoProfile,
                     fullName = userProfileResponse.fullName,
                     username = userProfileResponse.username,
                     email = userProfileResponse.email,
@@ -151,10 +151,10 @@ class UserRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             try {
                 val expertiseItems = addMentor.expertises.asExpertiseItems()
-                val mentorRequestBody = MentorRequestBody(
+                val mentorBodyRequest = MentorBodyRequest(
                     expertises = expertiseItems
                 )
-                mentorRemoteDataSource.addMentorProfile(addMentor.id, mentorRequestBody)
+                mentorRemoteDataSource.addMentorProfile(addMentor.id, mentorBodyRequest)
                 Either.Right(null)
             } catch (e: IOException) {
                 Either.Left(Failure.ConnectionFailure("No internet connection"))

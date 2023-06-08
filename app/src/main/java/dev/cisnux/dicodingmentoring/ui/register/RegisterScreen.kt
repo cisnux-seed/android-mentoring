@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.ui.register
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme

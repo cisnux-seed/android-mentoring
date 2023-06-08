@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.ui.login
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -230,13 +231,16 @@ fun LoginContent(
             shape = MaterialTheme.shapes.small,
             enabled = !isLoading
         ) {
-            if (!isLoading)
+            AnimatedVisibility(visible = isLoading) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier
+                        .size(24.dp)
+                )
+            }
+            AnimatedVisibility(visible = !isLoading) {
                 Text(text = stringResource(id = R.string.sign_in))
-            else CircularProgressIndicator(
-                color = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier
-                    .size(24.dp)
-            )
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         GoogleSignInButton(onAuth = onAuthGoogle)

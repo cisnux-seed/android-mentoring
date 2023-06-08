@@ -1,5 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -53,7 +54,6 @@ class MainViewModel @Inject constructor(
     }
 
     fun logout() = viewModelScope.launch {
-        _authSession.value = false
         currentUserId.first()?.let { id ->
             mentoringRepository.closeSocketSessions()
             authRepository.logout(id)

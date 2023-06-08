@@ -2,12 +2,16 @@ package dev.cisnux.dicodingmentoring.utils
 
 import dev.cisnux.dicodingmentoring.R
 
-
 data class CheckBoxItem(
     val title: String,
     val checked: Boolean,
     val onCheckedChange: (checked: Boolean, title: String) -> Unit
 )
+
+sealed interface UserType {
+    object Mentee : UserType
+    object Mentor : UserType
+}
 
 data class MentoringForm(
     var learningPath: String,

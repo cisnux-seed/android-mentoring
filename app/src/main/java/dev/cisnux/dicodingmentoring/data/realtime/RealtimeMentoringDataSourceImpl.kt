@@ -24,14 +24,15 @@ import javax.inject.Inject
 class RealtimeMentoringDataSourceImpl @Inject constructor(
     private val client: HttpClient,
 ) : RealtimeMentoringDataSource {
-    private var session: WebSocketSession? = null
+    private var mentoringSession: WebSocketSession? = null
+    private var detailMentoring: WebSocketSession? = null
 
     override fun getRealtimeMentoringSessions(userId: String): Flow<List<GetRealtimeMentoring>> =
         flow {
-            session = client.webSocketSession {
+            mentoringSession = client.webSocketSession {
                 url("$WS_BASE_URL/mentoring?userId=$userId")
             }
-            val mentoringSessions = session!!
+            val mentoringSessions = mentoringSession!!
                 .incoming
                 .consumeAsFlow()
                 .filterIsInstance<Frame.Text>()
@@ -41,19 +42,49 @@ class RealtimeMentoringDataSourceImpl @Inject constructor(
             emitAll(mentoringSessions)
         }
 
-
-    override suspend fun createRealtimeMentoring(createRealtimeMentoring: CreateRealtimeMentoring) {
-        session = client.webSocketSession {
-            url("$WS_BASE_URL/mentoring")
+    override fun getRealtimeDetailMentoring(
+        userId: String,
+        mentoringId: String
+    ): Flow<GetRealtimeDetailMentoring> = flow {
+        detailMentoring = client.webSocketSession {
+            url("$WS_BASE_URL/detailMentoring?userId=$userId&mentoringId=$mentoringId")
         }
-
-        session?.send(
-            Frame.Text(Json.Default.encodeToString(createRealtimeMentoring))
-        )
+        val detailMentoring = detailMentoring!!
+            .incoming
+            .consumeAsFlow()
+            .filterIsInstance<Frame.Text>()
+            .mapNotNull {
+                Json.Default.decodeFromString<GetRealtimeDetailMentoring>(it.readText())
+            }
+        emitAll(detailMentoring)
     }
 
-    override suspend fun close(): Unit = withContext(Dispatchers.IO) {
-        session?.close()
-        session = null
+
+    override suspend fun createRealtimeMentoring(createRealtimeMentoring: CreateRealtimeMentoring): Unit =
+        withContext(Dispatchers.IO) {
+            mentoringSession = client.webSocketSession {
+                url("$WS_BASE_URL/mentoring")
+            }
+
+            mentoringSession?.send(
+                Frame.Text(Json.Default.encodeToString(createRealtimeMentoring))
+            )
+        }
+
+    override suspend fun acceptMentoring(acceptMentoring: AcceptMentoring): Unit =
+        withContext(Dispatchers.IO) {
+            detailMentoring?.send(
+                Frame.Text(Json.Default.encodeToString(acceptMentoring))
+            )
+        }
+
+    override suspend fun closeMentoringSocket(): Unit = withContext(Dispatchers.IO) {
+        mentoringSession?.close()
+        mentoringSession = null
+    }
+
+    override suspend fun closeDetailMentoringSocket() {
+        detailMentoring?.close()
+        detailMentoring = null
     }
 }

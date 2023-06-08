@@ -17,8 +17,8 @@ data class MentorListData(
 
 data class MentorsItem(
 
-	@Json(name="photoProfileUrl")
-	val photoProfileUrl: String?,
+	@Json(name="photoProfile")
+	val photoProfile: String?,
 
 	@Json(name="averageRating")
 	val averageRating: Double,
@@ -37,7 +37,7 @@ fun List<MentorsItem>.asGetMentors() = map{
 	GetMentor(
 		id = it.id,
 		fullName = it.fullName,
-		photoProfileUrl = it.photoProfileUrl,
+		photoProfile = it.photoProfile,
 		job = it.job,
 		averageRating = it.averageRating
 	)

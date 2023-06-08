@@ -10,7 +10,7 @@ interface AuthRepository {
     suspend fun register(user: AuthUser): Either<Exception, String?>
     suspend fun signInWithEmailAndPassword(user: AuthUser): Either<Exception, String?>
     suspend fun resetPassword(email: String): Either<Exception, Nothing?>
-    suspend fun signInWithGoogle(token: String?): Either<Exception, String?>
+    suspend fun signInWithGoogle(googleToken: String?): Either<Exception, String?>
     fun getAuthSession(id: String): Flow<Boolean>
     suspend fun saveAuthSession(id: String, session: Boolean)
     fun getGoogleIntent(): Intent

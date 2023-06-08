@@ -94,7 +94,7 @@ fun MyProfileScreen(
                         email = it.email,
                         username = it.username,
                         about = it.about,
-                        photoProfile = it.photoProfileUrl,
+                        photoProfile = it.photoProfile,
                         isMentor = it.isMentorValid,
                         modifier = Modifier.padding(innerPadding),
                         context = context,

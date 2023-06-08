@@ -1,4 +1,4 @@
-package dev.cisnux.dicodingmentoring.ui.mentordetail
+package dev.cisnux.dicodingmentoring.ui.detailmentor
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -44,13 +44,13 @@ import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import dev.cisnux.dicodingmentoring.utils.UiState
 
 @Composable
-fun MentorDetailScreen(
+fun DetailMentorScreen(
     mainViewModel: MainViewModel,
     id: String,
     navigateToCreateMentoring: (id: String) -> Unit,
     navigateUp: () -> Unit,
     modifier: Modifier = Modifier,
-    mentorDetailViewModel: MentorDetailViewModel = hiltViewModel()
+    detailMentorViewModel: DetailMentorViewModel = hiltViewModel()
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
     LaunchedEffect(Unit) {
@@ -59,7 +59,7 @@ fun MentorDetailScreen(
     val snackbarHostState = remember {
         SnackbarHostState()
     }
-    val mentorDetailState by mentorDetailViewModel.mentorDetailState
+    val mentorDetailState by detailMentorViewModel.mentorDetailState
 
     MentorDetailContent(
         modifier = modifier,
@@ -69,7 +69,7 @@ fun MentorDetailScreen(
         }
     ) { innerPadding ->
         when (mentorDetailState) {
-            is UiState.Initialize -> mentorDetailViewModel.getMentorProfile()
+            is UiState.Initialize -> detailMentorViewModel.getMentorProfile()
 
             is UiState.Error -> {
                 (mentorDetailState as UiState.Error).error?.let { exception ->
@@ -89,7 +89,7 @@ fun MentorDetailScreen(
                         email = it.email,
                         username = it.username,
                         about = it.about,
-                        photoProfile = it.photoProfileUrl,
+                        photoProfile = it.photoProfile,
                         isMentor = it.isMentorValid,
                         modifier = Modifier.padding(innerPadding),
                         context = context,
@@ -154,7 +154,7 @@ fun MentorDetailScreen(
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
-fun MentorDetailContentPreview() {
+fun DetailMentorContentPreview() {
     Surface {
         DicodingMentoringTheme {
             MentorDetailContent(

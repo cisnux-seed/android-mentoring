@@ -14,9 +14,9 @@ import dev.cisnux.dicodingmentoring.R
 import dev.cisnux.dicodingmentoring.domain.models.AddMentoringSession
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.domain.repositories.MentoringRepository
+import dev.cisnux.dicodingmentoring.utils.combineDateAndTime
 import dev.cisnux.dicodingmentoring.utils.withDateFormat
 import dev.cisnux.dicodingmentoring.utils.withTimeFormat
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -40,8 +40,8 @@ class CreateMentoringViewModel @Inject constructor(
     val description: State<String> get() = _description
     private val _mentoringType = mutableStateOf(context.getString(R.string.chat))
     val mentoringType: State<String> get() = _mentoringType
-    private var mentoringDateMillis = MutableStateFlow(0L)
-    private var mentoringTimeMillis = MutableStateFlow(0L)
+    private var mentoringDateMillis = 0L
+    private var mentoringTimeMillis = 0L
     private val _mentoringDate = mutableStateOf("")
     val mentoringDate: State<String> get() = _mentoringDate
     private val _mentoringTime = mutableStateOf("")
@@ -59,8 +59,8 @@ class CreateMentoringViewModel @Inject constructor(
     }
 
     fun onMentoringDateChanged(selectedDate: Long?) {
-        if (selectedDate != mentoringDateMillis.value) {
-            mentoringTimeMillis.value = 0L
+        if (selectedDate != mentoringDateMillis) {
+            mentoringTimeMillis = 0L
             _mentoringTime.value = ""
         }
         selectedDate?.let { dateMillis ->
@@ -69,8 +69,8 @@ class CreateMentoringViewModel @Inject constructor(
             val currentDate = selectedCal.get(Calendar.DAY_OF_MONTH)
 
             if (currentDate >= today) {
-                mentoringDateMillis.value = dateMillis
-                _mentoringDate.value = mentoringDateMillis.value.withDateFormat()
+                mentoringDateMillis= dateMillis
+                _mentoringDate.value = mentoringDateMillis.withDateFormat()
             }
         }
     }
@@ -79,15 +79,15 @@ class CreateMentoringViewModel @Inject constructor(
         selectedTime?.let { timeMillis ->
             if (_mentoringDate.value.isNotBlank()) {
                 val selectedCal = Calendar.getInstance()
-                selectedCal.time = Date(mentoringDateMillis.value)
+                selectedCal.time = Date(mentoringDateMillis)
                 val currentDate = selectedCal.get(Calendar.DAY_OF_MONTH)
 
                 if (currentDate == today && timeMillis >= System.currentTimeMillis()) {
-                    mentoringTimeMillis.value = timeMillis
-                    _mentoringTime.value = mentoringTimeMillis.value.withTimeFormat()
+                    mentoringTimeMillis = timeMillis
+                    _mentoringTime.value = mentoringTimeMillis.withTimeFormat()
                 } else if (currentDate > today) {
-                    mentoringTimeMillis.value = timeMillis
-                    _mentoringTime.value = mentoringTimeMillis.value.withTimeFormat()
+                    mentoringTimeMillis = timeMillis
+                    _mentoringTime.value = mentoringTimeMillis.withTimeFormat()
                 }
             }
         }
@@ -112,9 +112,11 @@ class CreateMentoringViewModel @Inject constructor(
                 mentorId = mentorId,
                 title = _title.value,
                 description = _description.value,
-                mentoringTime = mentoringTimeMillis.value,
-                mentoringDate = mentoringDateMillis.value,
-                isOnlyChat = _mentoringType.value == context.getString(R.string.chat)
+                isOnlyChat = _mentoringType.value == context.getString(R.string.chat),
+                eventTime = combineDateAndTime(
+                    date = mentoringDateMillis,
+                    time = mentoringTimeMillis
+                )
             )
             mentoringRepository.createMentoring(addMentoring)
             _isCreateMentoringSuccess.value = true

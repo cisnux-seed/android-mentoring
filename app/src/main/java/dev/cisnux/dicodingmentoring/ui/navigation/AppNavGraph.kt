@@ -1,5 +1,6 @@
 package dev.cisnux.dicodingmentoring.ui.navigation
 
+import android.content.Intent
 import androidx.compose.material3.DrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -11,19 +12,24 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.addmentor.AddMentorScreen
+import dev.cisnux.dicodingmentoring.ui.chatroom.RoomChatScreen
 import dev.cisnux.dicodingmentoring.ui.creatementoring.CreateMentoringScreen
-import dev.cisnux.dicodingmentoring.ui.matchmentoring.MatchMakingScreen
+import dev.cisnux.dicodingmentoring.ui.detailmentor.DetailMentorScreen
+import dev.cisnux.dicodingmentoring.ui.detailmentoring.DetailMentoringScreen
 import dev.cisnux.dicodingmentoring.ui.home.HomeScreen
 import dev.cisnux.dicodingmentoring.ui.login.LoginScreen
-import dev.cisnux.dicodingmentoring.ui.mentordetail.MentorDetailScreen
+import dev.cisnux.dicodingmentoring.ui.matchmentoring.MatchMakingScreen
 import dev.cisnux.dicodingmentoring.ui.mentoring.MentoringScreen
 import dev.cisnux.dicodingmentoring.ui.mentoring.MentoringViewModel
 import dev.cisnux.dicodingmentoring.ui.myprofile.MyProfileScreen
 import dev.cisnux.dicodingmentoring.ui.register.RegisterScreen
 import dev.cisnux.dicodingmentoring.ui.registerprofile.RegisterProfileScreen
 import dev.cisnux.dicodingmentoring.ui.resetpassword.ResetPasswordScreen
+
+const val URI = "https://www.mentoring.cisnux.xyz"
 
 @Composable
 fun AppNavGraph(
@@ -34,22 +40,20 @@ fun AppNavGraph(
     modifier: Modifier = Modifier,
 ) {
     val authSession by mainViewModel.authSession.collectAsStateWithLifecycle()
-    val mentoringViewModel:MentoringViewModel = hiltViewModel()
+    val mentoringViewModel: MentoringViewModel = hiltViewModel()
 
     authSession?.let { isSessionExist ->
         val startDestination = if (isSessionExist) AppDestinations.HOME_ROUTE
         else AppDestinations.LOGIN_ROUTE
 
         NavHost(
-            navController = navController,
-            startDestination = startDestination,
-            modifier = modifier
+            navController = navController, startDestination = startDestination, modifier = modifier
         ) {
             composable(
                 route = AppDestinations.LOGIN_ROUTE,
             ) {
                 LoginScreen(
-                    navigateToHome = navigationActions.navigateToHome,
+                    navigateToHome = navigationActions.navigateToHomeForLogin,
                     navigateToRegister = navigationActions.navigateToRegister,
                     navigateToResetPassword = navigationActions.navigateToResetPassword,
                     navigateToRegisterProfile = navigationActions.navigateToRegisterProfile,
@@ -85,7 +89,8 @@ fun AppNavGraph(
             ) {
                 MentoringScreen(
                     mainViewModel = mainViewModel,
-                    mentoringViewModel = mentoringViewModel
+                    mentoringViewModel = mentoringViewModel,
+                    navigateToDetailMentoring = navigationActions.navigateToDetailMentoring
                 )
             }
             composable(
@@ -97,8 +102,7 @@ fun AppNavGraph(
                 )
             }
             composable(
-                route = AppDestinations.ADD_MENTOR_ROUTE,
-                arguments = listOf(navArgument("id") {
+                route = AppDestinations.ADD_MENTOR_ROUTE, arguments = listOf(navArgument("id") {
                     type = NavType.StringType
                 })
             ) {
@@ -108,20 +112,64 @@ fun AppNavGraph(
                 )
             }
             composable(
-                route = AppDestinations.MENTOR_DETAIL_ROUTE,
-                arguments = listOf(navArgument("id") {
+                route = AppDestinations.DETAIL_MENTOR_ROUTE, arguments = listOf(navArgument("id") {
                     type = NavType.StringType
                 })
             ) {
                 val id = it.arguments?.getString("id")
                 id?.let {
-                    MentorDetailScreen(
+                    DetailMentorScreen(
                         id = id,
                         navigateUp = navigationActions.navigateUp,
                         mainViewModel = mainViewModel,
                         navigateToCreateMentoring = navigationActions.navigateToCreateMentoring
                     )
                 }
+            }
+            composable(route = AppDestinations.DETAIL_MENTORING_ROUTE,
+                arguments = listOf(navArgument("mentoringId") {
+                    type = NavType.StringType
+                }),
+                deepLinks = listOf(navDeepLink {
+                    uriPattern = "$URI/${AppDestinations.DETAIL_MENTORING_ROUTE}"
+                    action = Intent.ACTION_VIEW
+                })
+            ) {
+                DetailMentoringScreen(
+                    navigateToMentoring = navigationActions.navigateToMentoring,
+                    mainViewModel = mainViewModel,
+                    navigateToRoomChat = navigationActions.navigateToRoomChat
+                )
+            }
+            composable(route = AppDestinations.CHAT_ROOM_ROUTE, arguments = listOf(
+                navArgument("roomChatId") {
+                    type = NavType.StringType
+                },
+                navArgument("fullName") {
+                    type = NavType.StringType
+                },
+                navArgument("email") {
+                    type = NavType.StringType
+                },
+                navArgument("photoProfile") {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ), deepLinks = listOf(navDeepLink {
+                uriPattern = "$URI/${AppDestinations.CHAT_ROOM_ROUTE}"
+                action = Intent.ACTION_VIEW
+            })
+            ) { backStackEntry ->
+                val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
+                val email = backStackEntry.arguments?.getString("email") ?: ""
+                val photoProfile = backStackEntry.arguments?.getString("photoProfile")
+                RoomChatScreen(
+                    mainViewModel = mainViewModel,
+                    fullName = fullName,
+                    email = email,
+                    photoProfile = photoProfile,
+                    navigateUp = navigationActions.navigateUp
+                )
             }
             composable(
                 route = AppDestinations.MATCHMAKING_ROUTE,
@@ -160,5 +208,4 @@ fun AppNavGraph(
             }
         }
     }
-
 }

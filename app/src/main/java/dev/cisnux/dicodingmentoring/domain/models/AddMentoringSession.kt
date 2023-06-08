@@ -7,8 +7,7 @@ data class AddMentoringSession(
     val menteeId: String,
     val title: String,
     val description: String,
-    val mentoringDate: Long,
-    val mentoringTime: Long,
+    val eventTime: Long,
     val isOnlyChat: Boolean,
 )
 
@@ -18,7 +17,6 @@ fun AddMentoringSession.asCreateRealtimeMentoring() =
         menteeId,
         title,
         description,
-        mentoringDate,
-        mentoringTime,
-        isOnlyChat
+        isOnlyChat,
+        eventTime,
     )
