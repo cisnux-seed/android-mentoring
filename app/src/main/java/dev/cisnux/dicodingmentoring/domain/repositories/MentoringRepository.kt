@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface MentoringRepository {
     fun getMentoringSessions(userId: String): Flow<List<GetMentoringSession>>
     suspend fun createMentoring(addMentoringSession: AddMentoringSession)
-    suspend fun closeSocketSessions()
+    suspend fun closeMentoringSockets()
     fun getRealtimeDetailMentoring(
         userId: String,
         mentoringId: String

@@ -42,9 +42,14 @@ class ChatRealtimeDataSourceImpl @Inject constructor(
     }
 
     override suspend fun sentMessage(addChat: AddChat): Unit = withContext(Dispatchers.IO) {
-        roomSocket?.send(
-            Frame.Text(Json.encodeToString(addChat))
-        )
+        try {
+            Log.d("roomSocket", (roomSocket == null).toString())
+            roomSocket?.send(
+                Frame.Text(Json.encodeToString(addChat))
+            )
+        } catch (e: Exception) {
+            Log.d("onError", e.stackTraceToString())
+        }
     }
 
     override suspend fun onCloseSocket() {

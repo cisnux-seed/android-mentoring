@@ -1,6 +1,7 @@
 package dev.cisnux.dicodingmentoring.ui.chatroom
 
 import android.content.Context
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,8 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -41,12 +45,17 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -55,6 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -63,20 +73,20 @@ import dev.cisnux.dicodingmentoring.data.realtime.Chat
 import dev.cisnux.dicodingmentoring.ui.MainViewModel
 import dev.cisnux.dicodingmentoring.ui.theme.DicodingMentoringTheme
 import dev.cisnux.dicodingmentoring.utils.withTimeFormat
+import kotlinx.coroutines.launch
 
 @Composable
 fun RoomChatScreen(
     mainViewModel: MainViewModel,
     modifier: Modifier = Modifier,
-    fullName: String,
-    email: String,
-    photoProfile: String?,
     navigateUp: () -> Unit,
     chatRoomViewModel: ChatRoomViewModel = hiltViewModel()
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
+    val subscribeRoomChat by rememberUpdatedState(chatRoomViewModel::subscribeRoomChat)
     LaunchedEffect(Unit) {
         oneTimeUpdateState(false)
+        subscribeRoomChat()
     }
     val snackbarHostState = remember {
         SnackbarHostState()
@@ -87,6 +97,9 @@ fun RoomChatScreen(
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val currentUserId by chatRoomViewModel.currentUserId
+    val receiver by chatRoomViewModel.receiver
+    val lazyScrollState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     if (shouldShowConnectionError) {
         LaunchedEffect(snackbarHostState) {
@@ -95,13 +108,22 @@ fun RoomChatScreen(
     }
 
     ChatRoomContent(
-        fullName = fullName,
-        email = email,
         modifier = modifier,
-        context = context,
-        navigateUp = navigateUp,
-        photoProfile = photoProfile,
         snackbarHostState = snackbarHostState,
+        topBar = {
+            receiver?.let {
+                RoomTopBar(
+                    fullName = it.fullName,
+                    email = it.email,
+                    context = context,
+                    photoProfile = it.photoProfile,
+                    navigateUp = {
+                        chatRoomViewModel.closeSocket()
+                        navigateUp()
+                    }
+                )
+            }
+        },
         body = { innerPadding ->
             ChatRoomBody(
                 chats = realtimeChats?.chats ?: listOf(),
@@ -115,198 +137,137 @@ fun RoomChatScreen(
                 onSentMessage = {
                     if (message.isNotBlank()) {
                         chatRoomViewModel.onSentNewMessage()
+                        coroutineScope.launch {
+                            lazyScrollState.animateScrollToItem(0)
+                        }
                     }
-                }
+                },
+                lazyScrollState = lazyScrollState
             )
-        }
-    )
+        })
+
+    BackHandler {
+        chatRoomViewModel.closeSocket()
+        navigateUp()
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun ChatRoomContentPreview() {
-    ChatRoomContent(
-        context = LocalContext.current,
-        fullName = "Levi Ackerman",
-        email = "levi@gmail.com",
-        photoProfile = "",
-        navigateUp = {},
-        snackbarHostState = SnackbarHostState(), body = { innerPadding ->
-            ChatRoomBody(
-                modifier = Modifier.padding(innerPadding),
-                chats = listOf(
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet risus auctor, volutpat dui et, luctus nulla.",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet risus.",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id2",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id2",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id2",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
-                        createdAt = 2999991029,
-                    ),
-                    Chat(
-                        id = "",
-                        roomChatId = "",
-                        senderId = "id1",
-                        receiverId = "",
-                        message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet risus auctor, volutpat dui et, luctus nulla.",
-                        createdAt = 2999991029,
-                    ),
+    ChatRoomContent(topBar = {
+        RoomTopBar(fullName = "Fajra",
+            email = "fajra@gmail.com",
+            context = LocalContext.current,
+            photoProfile = "",
+            navigateUp = { })
+    }, snackbarHostState = SnackbarHostState(), body = { innerPadding ->
+        ChatRoomBody(
+            modifier = Modifier.padding(innerPadding),
+            chats = listOf(
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet risus auctor, volutpat dui et, luctus nulla.",
+                    createdAt = 2999991029,
                 ),
-                message = "",
-                textFieldScrollState = rememberScrollState(),
-                onMessageChanged = {},
-                onSender = {
-                    "id2" == it
-                },
-                onSentMessage = {}
-            )
-        })
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet risus.",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id2",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id2",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id2",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing",
+                    createdAt = 2999991029,
+                ),
+                Chat(
+                    id = "",
+                    roomChatId = "",
+                    senderId = "id1",
+                    receiverId = "",
+                    message = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam sit amet risus auctor, volutpat dui et, luctus nulla.",
+                    createdAt = 2999991029,
+                ),
+            ),
+            message = "",
+            textFieldScrollState = rememberScrollState(),
+            onMessageChanged = {},
+            onSender = {
+                "id2" == it
+            },
+            onSentMessage = {},
+            lazyScrollState = rememberLazyListState()
+        )
+    })
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatRoomContent(
-    fullName: String,
-    email: String,
-    context: Context,
-    photoProfile: String?,
-    navigateUp: () -> Unit,
+    topBar: @Composable () -> Unit,
     snackbarHostState: SnackbarHostState,
     body: @Composable (PaddingValues) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        modifier = modifier,
-        topBar = {
-            TopAppBar(
-                navigationIcon = {
-                    IconButton(onClick = navigateUp) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface
-                ),
-                title = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.Top
-                    ) {
-                        photoProfile?.let {
-                            AsyncImage(
-                                model = ImageRequest.Builder(context)
-                                    .data(photoProfile)
-                                    .crossfade(true)
-                                    .build(),
-                                placeholder = painterResource(id = R.drawable.circle_avatar_loading_placeholder),
-                                contentDescription = null,
-                                contentScale = ContentScale.Crop,
-                                modifier = Modifier
-                                    .border(1.dp, Color.White, CircleShape)
-                                    .clip(CircleShape)
-                                    .size(45.dp)
-                            )
-                        } ?: Box(
-                            modifier = Modifier
-                                .border(1.dp, Color.White, CircleShape)
-                                .background(
-                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                    shape = CircleShape
-                                )
-                                .size(45.dp)
-                        ) {
-                            Text(
-                                text = fullName[0].toString(),
-                                style = MaterialTheme.typography.titleMedium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column {
-                            Text(
-                                text = fullName,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Spacer(modifier = Modifier.height(1.dp))
-                            Text(
-                                text = email,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                    }
-                }
-            )
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        }) { innerPadding ->
+    Scaffold(modifier = modifier, topBar = topBar, snackbarHost = {
+        SnackbarHost(hostState = snackbarHostState)
+    }) { innerPadding ->
         body(innerPadding)
     }
 }
@@ -339,35 +300,58 @@ fun ChatRoomBody(
     modifier: Modifier = Modifier,
     message: String,
     textFieldScrollState: ScrollState,
+    lazyScrollState: LazyListState,
     onMessageChanged: (String) -> Unit,
     onSender: (String) -> Boolean,
     onSentMessage: () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = modifier.align(Alignment.TopCenter),
-            contentPadding = PaddingValues(horizontal = 16.dp),
+    var prevSenderId by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    ConstraintLayout(modifier = Modifier.fillMaxSize()) {
+        val (messages, messageForm) = createRefs()
+
+        LazyColumn(contentPadding = PaddingValues(bottom = 8.dp),
+            modifier = modifier.constrainAs(messages) {
+                width = Dimension.fillToConstraints
+                height = Dimension.fillToConstraints
+                bottom.linkTo(messageForm.top)
+                top.linkTo(parent.top)
+                end.linkTo(parent.end, margin = 16.dp)
+                start.linkTo(parent.start, margin = 16.dp)
+            },
+            state = lazyScrollState,
+            reverseLayout = true,
             content = {
                 items(chats) { chat ->
-                    val isUserMe = onSender(chat.senderId)
-                    if (isUserMe)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    prevSenderId = chat.senderId
+                    val currentSenderId = chat.senderId
+                    val isUserMe = onSender(currentSenderId)
+                    if (prevSenderId != currentSenderId) Spacer(modifier = Modifier.height(8.dp))
                     BubbleMessage(
                         message = chat.message,
                         time = chat.createdAt.withTimeFormat(),
                         isUserMe = isUserMe
                     )
-                    Spacer(modifier = Modifier.height(if (isUserMe) 12.dp else 6.dp))
+                    Spacer(modifier = Modifier.height(if (prevSenderId != currentSenderId) 12.dp else 6.dp))
                 }
             })
-        OutlinedTextField(
-            value = message,
+        OutlinedTextField(value = message,
             maxLines = 4,
             onValueChange = onMessageChanged,
             modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .padding(start = 16.dp, end = 16.dp, bottom = 4.dp)
-                .verticalScroll(textFieldScrollState),
+                .verticalScroll(textFieldScrollState)
+                .background(
+                    color = MaterialTheme.colorScheme.background, shape = RectangleShape
+                )
+                .padding(8.dp)
+                .constrainAs(messageForm) {
+                    width = Dimension.fillToConstraints
+                    bottom.linkTo(parent.bottom)
+                    end.linkTo(parent.end)
+                    start.linkTo(parent.start)
+                },
             placeholder = {
                 Text(
                     text = "Write message....",
@@ -412,51 +396,120 @@ fun BubbleMessage(
     val bubbleShape = if (isUserMe) RoundedCornerShape(4.dp, 20.dp, 4.dp, 20.dp)
     else RoundedCornerShape(20.dp, 4.dp, 20.dp, 4.dp)
 
-    ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
-        val bubbleContainer = createRef()
-        Box(modifier = modifier
-            .fillMaxWidth(0.7f)
-            .constrainAs(bubbleContainer) {
-                if (isUserMe)
-                    end.linkTo(parent.end)
-                else start.linkTo(parent.start)
-            }) {
+    Box(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth(0.7f)
+                .align(if (isUserMe) Alignment.BottomEnd else Alignment.BottomStart)
+        ) {
             Surface(
                 color = backgroundBubbleColor,
                 shape = bubbleShape,
                 tonalElevation = 2.dp,
-                shadowElevation = 2.dp
+                shadowElevation = 2.dp,
+                modifier = Modifier.align(if (isUserMe) Alignment.End else Alignment.Start)
             ) {
-                Column(
+                ConstraintLayout(
                     modifier = Modifier
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(
+                            horizontal = 10.dp, vertical = 6.dp
+                        )
+                        .wrapContentWidth()
                 ) {
-                    ConstraintLayout {
-                        val (userMessage, createdAt) = createRefs()
-                        SelectionContainer(modifier = Modifier.constrainAs(userMessage) {
-                            top.linkTo(parent.top)
-                        }) {
-                            Text(
-                                textAlign = TextAlign.Start,
-                                color = if (isUserMe) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                text = message,
-                                style = MaterialTheme.typography.bodyMedium,
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(2.dp))
+                    val (userMessageContainer, createdAt) = createRefs()
+                    SelectionContainer(modifier = Modifier.constrainAs(userMessageContainer) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }) {
                         Text(
-                            text = time,
-                            textAlign = TextAlign.End,
+                            textAlign = TextAlign.Start,
                             color = if (isUserMe) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                            style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.constrainAs(createdAt) {
-                                top.linkTo(userMessage.bottom)
-                                end.linkTo(userMessage.end, margin = 2.dp)
-                            }
+                            text = message,
+                            style = MaterialTheme.typography.bodyMedium,
                         )
                     }
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(text = time,
+                        textAlign = TextAlign.End,
+                        color = if (isUserMe) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.constrainAs(createdAt) {
+                            top.linkTo(userMessageContainer.bottom)
+                            end.linkTo(parent.end, margin = 2.dp)
+                        })
                 }
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RoomTopBar(
+    fullName: String,
+    email: String,
+    context: Context,
+    photoProfile: String?,
+    navigateUp: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    TopAppBar(
+        modifier = modifier,
+        navigationIcon = {
+            IconButton(onClick = navigateUp) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            scrolledContainerColor = MaterialTheme.colorScheme.surface
+        ),
+        title = {
+            Row(
+                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top
+            ) {
+                photoProfile?.let {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context).data(photoProfile).crossfade(true)
+                            .build(),
+                        placeholder = painterResource(id = R.drawable.circle_avatar_loading_placeholder),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .border(1.dp, Color.White, CircleShape)
+                            .clip(CircleShape)
+                            .size(45.dp)
+                    )
+                } ?: Box(
+                    modifier = Modifier
+                        .border(1.dp, Color.White, CircleShape)
+                        .background(
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            shape = CircleShape
+                        )
+                        .size(45.dp)
+                ) {
+                    Text(
+                        text = fullName[0].toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = fullName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Spacer(modifier = Modifier.height(1.dp))
+                    Text(
+                        text = email,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+        })
 }

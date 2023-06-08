@@ -7,7 +7,7 @@ import java.util.Date
 import java.util.Locale
 
 const val HTTP_BASE_URL = "https://www.mentoring.cisnux.xyz"
-const val WS_BASE_URL = "wss://www.mentoring.cisnux.xyz/ws/"
+const val WS_BASE_URL = "wss://www.mentoring.cisnux.xyz/ws"
 
 fun String.isEmail(): Boolean {
     val emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\$"

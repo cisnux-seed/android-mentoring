@@ -21,7 +21,7 @@ object AppDestinations {
     const val MY_PROFILE_ROUTE = "myprofile"
     const val ADD_MENTOR_ROUTE = "addmentor/{id}"
     const val CHAT_ROOM_ROUTE =
-        "chat?roomChatId={roomChatId}&fullName={fullName}&email={email}&photoProfile={photoProfile}"
+        "chat?roomChatId={roomChatId}"
 }
 
 class AppNavigationActions(
@@ -46,8 +46,9 @@ class AppNavigationActions(
         }
     }
     val navigateToMentoring: () -> Unit = {
+        navController.popBackStack()
         navController.navigate(AppDestinations.MENTORING_ROUTE) {
-            popUpTo(AppDestinations.HOME_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
                 inclusive = true
             }
             restoreState = true
@@ -78,14 +79,10 @@ class AppNavigationActions(
     val navigateToDetailMentoring: (mentoringId: String) -> Unit = { mentoringId ->
         navController.navigate("mentoring/$mentoringId")
     }
-    val navigateToRoomChat: (roomChatId: String, fullName: String, email: String, photoProfile: String?) -> Unit =
-        { roomChatId, fullName, email, photoProfile ->
+    val navigateToRoomChat: (roomChatId: String) -> Unit =
+        { roomChatId ->
             navController.navigate(
-                "chat?roomChatId=$roomChatId&fullName=$fullName&email=$email${
-                    photoProfile?.let {
-                        "&photoProfile=$it"
-                    } ?: ""
-                }"
+                "chat?roomChatId=$roomChatId"
             )
         }
     val navigateToMatchmaking: () -> Unit = {

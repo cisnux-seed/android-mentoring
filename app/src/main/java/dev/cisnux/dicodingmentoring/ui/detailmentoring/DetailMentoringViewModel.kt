@@ -38,28 +38,25 @@ class DetailMentoringViewModel @Inject constructor(
     private val _userType = mutableStateOf<UserType>(UserType.Mentee)
     val userType: State<UserType> get() = _userType
 
-    fun data() {}
     private var defaultDuration = checkBoxDurations.first()
     private val _detailMentoring = mutableStateOf<GetRealtimeDetailMentoring?>(null)
     val detailMentoring: State<GetRealtimeDetailMentoring?> get() = _detailMentoring
 
-    init {
-        viewModelScope.launch {
-            authRepository.currentUser().collectLatest {
-                Log.d(DetailMentoringViewModel::class.simpleName, it.uid.isNotBlank().toString())
-                if (it.uid.isNotBlank()) {
-                    mentoringRepository.getRealtimeDetailMentoring(it.uid, mentoringId)
-                        .catch {
-                            _showConnectionError.value = true
-                        }
-                        .collectLatest { mentoring ->
-                            _shouldShowLoading.value = false
-                            _detailMentoring.value = mentoring
-                            _userType.value =
-                                if (it.uid == mentoring.mentee.id) UserType.Mentee else UserType.Mentor
-                            _isAccepted.value = mentoring.isAccepted
-                        }
-                }
+    fun subscribeDetailMentoring() = viewModelScope.launch {
+        authRepository.currentUser().collectLatest {
+            Log.d(DetailMentoringViewModel::class.simpleName, it.uid.isNotBlank().toString())
+            if (it.uid.isNotBlank()) {
+                mentoringRepository.getRealtimeDetailMentoring(it.uid, mentoringId)
+                    .catch {
+                        _showConnectionError.value = true
+                    }
+                    .collectLatest { mentoring ->
+                        _shouldShowLoading.value = false
+                        _detailMentoring.value = mentoring
+                        _userType.value =
+                            if (it.uid == mentoring.mentee.id) UserType.Mentee else UserType.Mentor
+                        _isAccepted.value = mentoring.isAccepted
+                    }
             }
         }
     }
@@ -82,6 +79,10 @@ class DetailMentoringViewModel @Inject constructor(
         mentoringRepository.acceptMentoring(
             acceptMentoring
         )
+    }
+
+    fun closeSocket() = viewModelScope.launch {
+        mentoringRepository.closeDetailMentoringSocket()
     }
 
     override fun onCleared() {

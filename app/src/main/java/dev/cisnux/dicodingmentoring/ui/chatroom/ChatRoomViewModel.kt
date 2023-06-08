@@ -1,6 +1,5 @@
 package dev.cisnux.dicodingmentoring.ui.chatroom
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
@@ -8,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.cisnux.dicodingmentoring.data.realtime.AddChat
+import dev.cisnux.dicodingmentoring.data.realtime.Mentee
 import dev.cisnux.dicodingmentoring.data.realtime.RealtimeChats
 import dev.cisnux.dicodingmentoring.domain.repositories.AuthRepository
 import dev.cisnux.dicodingmentoring.domain.repositories.ChatRepository
@@ -30,23 +30,24 @@ class ChatRoomViewModel @Inject constructor(
     private val _message = mutableStateOf("")
     val message: State<String> get() = _message
     private var _senderId = mutableStateOf<String?>(null)
+    private var _receiver = mutableStateOf<Mentee?>(null)
+    val receiver: State<Mentee?> get() = _receiver
     val currentUserId: State<String?> get() = _senderId
 
-    init {
-        viewModelScope.launch {
-            authRepository.currentUser().collectLatest {
-                if (it.uid.isNotBlank()) {
-                    _senderId.value = it.uid
-                    chatRepository.getRealtimeChats(it.uid, roomChatId)
-                        .catch { error ->
-                            _showConnectionError.value = true
-                            Log.d("realtime error", error.message.toString())
-                            Log.d("realtime error trace", error.stackTraceToString())
-                        }
-                        .collectLatest { chat ->
-                            _realtimeChats.value = chat
-                        }
-                }
+    fun subscribeRoomChat() = viewModelScope.launch {
+        authRepository.currentUser().collectLatest {
+            if (it.uid.isNotBlank()) {
+                _senderId.value = it.uid
+                chatRepository.getRealtimeChats(it.uid, roomChatId)
+                    .catch {
+                        _showConnectionError.value = true
+                    }
+                    .collectLatest { chat ->
+                        _realtimeChats.value = chat
+                        _receiver.value =
+                            if (_senderId.value == chat.mentee.id) chat.mentor
+                            else chat.mentee
+                    }
             }
         }
     }
@@ -56,16 +57,20 @@ class ChatRoomViewModel @Inject constructor(
     }
 
     fun onSentNewMessage() = viewModelScope.launch {
-        if (_senderId.value != null && _realtimeChats.value != null) {
+        if (_senderId.value != null && _receiver.value != null) {
             val addChat = AddChat(
                 roomChatId = roomChatId,
                 senderId = _senderId.value!!,
-                receiverId = if (_realtimeChats.value!!.menteeId == currentUserId.value) _realtimeChats.value!!.mentorId
-                else _realtimeChats.value!!.menteeId,
+                receiverId = _receiver.value!!.id,
                 message = _message.value
             )
             chatRepository.sentMessage(addChat)
+            _message.value = ""
         }
+    }
+
+    fun closeSocket() = viewModelScope.launch {
+        chatRepository.onCloseSocket()
     }
 
     override fun onCleared() {

@@ -126,7 +126,8 @@ fun AppNavGraph(
                     )
                 }
             }
-            composable(route = AppDestinations.DETAIL_MENTORING_ROUTE,
+            composable(
+                route = AppDestinations.DETAIL_MENTORING_ROUTE,
                 arguments = listOf(navArgument("mentoringId") {
                     type = NavType.StringType
                 }),
@@ -136,38 +137,24 @@ fun AppNavGraph(
                 })
             ) {
                 DetailMentoringScreen(
-                    navigateToMentoring = navigationActions.navigateToMentoring,
+                    navigateUp = navigationActions.navigateUp,
                     mainViewModel = mainViewModel,
                     navigateToRoomChat = navigationActions.navigateToRoomChat
                 )
             }
-            composable(route = AppDestinations.CHAT_ROOM_ROUTE, arguments = listOf(
-                navArgument("roomChatId") {
-                    type = NavType.StringType
-                },
-                navArgument("fullName") {
-                    type = NavType.StringType
-                },
-                navArgument("email") {
-                    type = NavType.StringType
-                },
-                navArgument("photoProfile") {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ), deepLinks = listOf(navDeepLink {
-                uriPattern = "$URI/${AppDestinations.CHAT_ROOM_ROUTE}"
-                action = Intent.ACTION_VIEW
-            })
-            ) { backStackEntry ->
-                val fullName = backStackEntry.arguments?.getString("fullName") ?: ""
-                val email = backStackEntry.arguments?.getString("email") ?: ""
-                val photoProfile = backStackEntry.arguments?.getString("photoProfile")
+            composable(
+                route = AppDestinations.CHAT_ROOM_ROUTE,
+                arguments = listOf(
+                    navArgument("roomChatId") {
+                        type = NavType.StringType
+                    },
+                ), deepLinks = listOf(navDeepLink {
+                    uriPattern = "$URI/${AppDestinations.CHAT_ROOM_ROUTE}"
+                    action = Intent.ACTION_VIEW
+                })
+            ) {
                 RoomChatScreen(
                     mainViewModel = mainViewModel,
-                    fullName = fullName,
-                    email = email,
-                    photoProfile = photoProfile,
                     navigateUp = navigationActions.navigateUp
                 )
             }

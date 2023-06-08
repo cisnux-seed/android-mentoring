@@ -1,5 +1,6 @@
 package dev.cisnux.dicodingmentoring.data.realtime
 
+import android.util.Log
 import dev.cisnux.dicodingmentoring.utils.WS_BASE_URL
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.webSocketSession
@@ -54,7 +55,9 @@ class RealtimeMentoringDataSourceImpl @Inject constructor(
             .consumeAsFlow()
             .filterIsInstance<Frame.Text>()
             .mapNotNull {
-                Json.Default.decodeFromString<GetRealtimeDetailMentoring>(it.readText())
+                val d = Json.Default.decodeFromString<GetRealtimeDetailMentoring>(it.readText())
+                Log.d("detailMentorings", d.toString())
+                d
             }
         emitAll(detailMentoring)
     }

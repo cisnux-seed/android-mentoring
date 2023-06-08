@@ -75,17 +75,19 @@ import dev.cisnux.dicodingmentoring.utils.withTimeFormat
 fun DetailMentoringScreen(
     mainViewModel: MainViewModel,
     modifier: Modifier = Modifier,
-    navigateToMentoring: () -> Unit,
-    navigateToRoomChat: (roomChatId: String, fullName: String, email: String, photoProfile: String?) -> Unit,
+    navigateUp: () -> Unit,
+    navigateToRoomChat: (roomChatId: String) -> Unit,
     detailMentoringViewModel: DetailMentoringViewModel = hiltViewModel(),
 ) {
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
     LaunchedEffect(Unit) {
         oneTimeUpdateState(false)
+        detailMentoringViewModel.subscribeDetailMentoring()
     }
     val snackbarHostState = remember {
         SnackbarHostState()
     }
+
     val shouldShowConnectionError by detailMentoringViewModel.showConnectionError
     val shouldShowLoading by detailMentoringViewModel.shouldShowLoading
     val detailMentoring by detailMentoringViewModel.detailMentoring
@@ -126,12 +128,17 @@ fun DetailMentoringScreen(
                     showChatButton = detailMentoring!!.roomChatId != null,
                     mentorFullName = detailMentoring!!.mentor.fullName,
                     menteeFullName = detailMentoring!!.mentee.fullName,
+                    mentorPhotoProfile = detailMentoring?.mentor?.photoProfile,
+                    menteePhotoProfile = detailMentoring?.mentee?.photoProfile,
                     mentorEmail = detailMentoring!!.mentor.email,
                     menteeEmail = detailMentoring!!.mentee.email,
                     scrollState = scrollState,
                     context = context,
                     userType = userType,
-                    navigateUp = navigateToMentoring,
+                    navigateUp = {
+                        detailMentoringViewModel.closeSocket()
+                        navigateUp()
+                    },
                     showVideoChatButton = detailMentoring!!.videoChatLink != null,
                     navigateToRoomChat = navigateToRoomChat
                 )
@@ -147,8 +154,10 @@ fun DetailMentoringScreen(
                 }
             }
         })
+
     BackHandler {
-        navigateToMentoring()
+        detailMentoringViewModel.closeSocket()
+        navigateUp()
     }
 }
 
@@ -184,7 +193,7 @@ fun DetailMentoringContentPreview() {
                 userType = UserType.Mentee,
                 navigateUp = {},
                 showVideoChatButton = true,
-                navigateToRoomChat = { _, _, _, _ -> }
+                navigateToRoomChat = {}
             )
         })
     }
@@ -228,7 +237,7 @@ fun DetailMentoringBody(
     scrollState: ScrollState,
     context: Context,
     userType: UserType,
-    navigateToRoomChat: (roomChatId: String, fullName: String, email: String, photoProfile: String?) -> Unit,
+    navigateToRoomChat: (roomChatId: String) -> Unit,
     modifier: Modifier = Modifier,
     mentorPhotoProfile: String? = null,
     menteePhotoProfile: String? = null,
@@ -338,9 +347,6 @@ fun DetailMentoringBody(
                     roomChatId?.let {
                         navigateToRoomChat(
                             roomChatId,
-                            mentorFullName,
-                            mentorEmail,
-                            mentorPhotoProfile
                         )
                     }
                 },
@@ -366,9 +372,6 @@ fun DetailMentoringBody(
                     roomChatId?.let {
                         navigateToRoomChat(
                             roomChatId,
-                            menteeFullName,
-                            menteeEmail,
-                            menteePhotoProfile
                         )
                     }
                 },

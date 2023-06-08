@@ -8,13 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
 import coil.ImageLoader
 import coil.request.ErrorResult
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import coil.transform.CircleCropTransformation
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
@@ -59,10 +59,8 @@ class CloudMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
-        Log.d("remoteMessageReceived", remoteMessage.data.toString().isEmpty().toString())
-        Log.d("remoteMessageReceived", remoteMessage.data.toString())
-
         val type = remoteMessage.data["type"]
+
         type?.let {
             if (type == "mentoring") {
                 val mentoringId = remoteMessage.data["mentoringId"]!!
@@ -87,22 +85,18 @@ class CloudMessagingService : FirebaseMessagingService() {
             } else {
                 val roomChatId = remoteMessage.data["roomChatId"]!!
                 val fullName = remoteMessage.data["fullName"]!!
-                val email = remoteMessage.data["email"]!!
                 val message = remoteMessage.data["message"]!!
                 val photoProfile = remoteMessage.data["photoProfile"]
-                @Suppress("KotlinConstantConditions")
 
                 photoProfile?.let {
                     sendChatNotificationWithPhotoProfile(
                         roomChatId,
                         fullName,
-                        email,
                         message,
                         photoProfile
                     )
                 } ?: sendChatNotification(
-                    roomChatId, fullName, email, message,
-                    photoProfile = photoProfile
+                    roomChatId, fullName, message
                 )
             }
         }
@@ -127,7 +121,7 @@ class CloudMessagingService : FirebaseMessagingService() {
         val deepLinkPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
             getPendingIntent(
-                0,
+                REQUEST_CODE,
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE
                 else PendingIntent.FLAG_UPDATE_CURRENT
             )
@@ -180,12 +174,13 @@ class CloudMessagingService : FirebaseMessagingService() {
             val request = ImageRequest.Builder(applicationContext)
                 .data(photoProfile)
                 .allowHardware(false)
+                .transformations(CircleCropTransformation())
                 .build()
 
             val deepLinkPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
                 addNextIntentWithParentStack(deepLinkIntent)
                 getPendingIntent(
-                    0,
+                    REQUEST_CODE,
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE
                     else PendingIntent.FLAG_UPDATE_CURRENT
                 )
@@ -194,7 +189,6 @@ class CloudMessagingService : FirebaseMessagingService() {
             val notification = when (val state = loader.execute(request)) {
                 is SuccessResult -> {
                     val bitmapPhotoProfile = (state.drawable as BitmapDrawable).bitmap
-
 
                     NotificationCompat.Builder(
                         applicationContext,
@@ -242,20 +236,22 @@ class CloudMessagingService : FirebaseMessagingService() {
     private fun sendChatNotification(
         roomChatId: String,
         fullName: String,
-        email: String,
         message: String,
-        photoProfile: String?
     ) {
         val deepLinkIntent = Intent(
             Intent.ACTION_VIEW,
-            "$URI/chat?roomChatId=$roomChatId&fullName=$fullName&email=$email&photoProfile=$photoProfile".toUri(),
+            "$URI/chat?roomChatId=$roomChatId".toUri(),
             applicationContext,
             MainActivity::class.java
         )
 
         val deepLinkPendingIntent: PendingIntent = TaskStackBuilder.create(applicationContext).run {
             addNextIntentWithParentStack(deepLinkIntent)
-            getPendingIntent(REQUEST_CODE, PendingIntent.FLAG_UPDATE_CURRENT)
+            getPendingIntent(
+                REQUEST_CODE,
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE
+                else PendingIntent.FLAG_UPDATE_CURRENT
+            )
         }
         val notificationBuilder = NotificationCompat.Builder(
             applicationContext,
@@ -283,7 +279,6 @@ class CloudMessagingService : FirebaseMessagingService() {
     private fun sendChatNotificationWithPhotoProfile(
         roomChatId: String,
         fullName: String,
-        email: String,
         message: String,
         photoProfile: String
     ) {
@@ -292,19 +287,24 @@ class CloudMessagingService : FirebaseMessagingService() {
             val request = ImageRequest.Builder(applicationContext)
                 .data(photoProfile)
                 .allowHardware(false)
+                .transformations(CircleCropTransformation())
                 .build()
 
 
             val deepLinkIntent = Intent(
                 Intent.ACTION_VIEW,
-                "$URI/chat?$roomChatId=$roomChatId&fullName=$fullName&email=$email&photoProfile=$photoProfile".toUri(),
+                "$URI/chat?roomChatId=$roomChatId".toUri(),
                 applicationContext,
                 MainActivity::class.java
             )
             val deepLinkPendingIntent: PendingIntent =
                 TaskStackBuilder.create(applicationContext).run {
                     addNextIntentWithParentStack(deepLinkIntent)
-                    getPendingIntent(REQUEST_CODE, PendingIntent.FLAG_UPDATE_CURRENT)
+                    getPendingIntent(
+                        REQUEST_CODE,
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_MUTABLE
+                        else PendingIntent.FLAG_UPDATE_CURRENT
+                    )
                 }
 
             val notification = when (val state = loader.execute(request)) {

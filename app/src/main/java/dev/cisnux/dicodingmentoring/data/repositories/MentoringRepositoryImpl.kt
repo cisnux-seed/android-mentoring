@@ -23,7 +23,7 @@ class MentoringRepositoryImpl @Inject constructor(
     override suspend fun createMentoring(addMentoringSession: AddMentoringSession) =
         dataSource.createRealtimeMentoring(addMentoringSession.asCreateRealtimeMentoring())
 
-    override suspend fun closeSocketSessions() =
+    override suspend fun closeMentoringSockets() =
         dataSource.closeMentoringSocket()
 
     override fun getRealtimeDetailMentoring(
@@ -34,9 +34,5 @@ class MentoringRepositoryImpl @Inject constructor(
     override suspend fun acceptMentoring(acceptMentoring: AcceptMentoring) =
         dataSource.acceptMentoring(acceptMentoring)
 
-    override suspend fun closeDetailMentoringSocket() {
-        TODO("Not yet implemented")
-    }
-
-
+    override suspend fun closeDetailMentoringSocket() = dataSource.closeDetailMentoringSocket()
 }

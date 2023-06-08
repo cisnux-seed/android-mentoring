@@ -56,8 +56,8 @@ fun MentoringScreen(
     val oneTimeUpdateState by rememberUpdatedState(mainViewModel::updateBottomState)
     LaunchedEffect(Unit) {
         oneTimeUpdateState(true)
+        mentoringViewModel.subscribeMentoringSessions()
     }
-    mentoringViewModel.subscribeMentoringSessions()
     val snackbarHostState = remember {
         SnackbarHostState()
     }

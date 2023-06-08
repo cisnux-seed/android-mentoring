@@ -1,6 +1,5 @@
 package dev.cisnux.dicodingmentoring.ui.mentoring
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -32,7 +31,6 @@ class MentoringViewModel @Inject constructor(
             _showConnectionError.value = true
         }.collectLatest {
             it.uid?.let { id ->
-                Log.d("onInit", "init ${id.isNotBlank()}")
                 if (id.isNotBlank()) {
                     mentoringRepository.getMentoringSessions(id)
                         .collectLatest { mentoringSessions ->
@@ -42,9 +40,11 @@ class MentoringViewModel @Inject constructor(
             }
         }
     }
-
     override fun onCleared() {
-        Log.d("onCleared", "clear mentoring view model")
         super.onCleared()
+
+        viewModelScope.launch {
+            mentoringRepository.closeMentoringSockets()
+        }
     }
 }

@@ -5,8 +5,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class RealtimeChats(
     val roomChatId: String,
-    val mentorId: String,
-    val menteeId: String,
+    val mentor: Mentee,
+    val mentee: Mentee,
     val endOfChatting: Long,
     val chats: List<Chat>
 )
