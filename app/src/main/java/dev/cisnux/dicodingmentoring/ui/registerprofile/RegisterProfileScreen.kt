@@ -251,10 +251,10 @@ fun RegisterProfileContent(
                 )
             },
             supportingText = {
-                if (fullName.isNotEmpty() && fullName.isBlank()) Text(text = "Please enter your full name")
+                if (fullName.isNotEmpty() && fullName.isBlank()) Text(text = "Please enter your Full Name")
             },
             placeholder = {
-                Text(text = "Enter your full name")
+                Text(text = "Enter your Full Name")
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -278,10 +278,10 @@ fun RegisterProfileContent(
             },
             supportingText = {
                 if (username.isNotEmpty() && username.isBlank())
-                    Text(text = "Please enter your username")
+                    Text(text = "Please enter your Username")
             },
             placeholder = {
-                Text(text = "Enter your username")
+                Text(text = "Enter your Username")
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
@@ -304,7 +304,7 @@ fun RegisterProfileContent(
                 )
             },
             supportingText = {
-                if (job.isNotEmpty() && job.isBlank()) Text(text = "Please enter your job")
+                if (job.isNotEmpty() && job.isBlank()) Text(text = "Please enter your Job")
             },
             placeholder = {
                 Text(text = "Enter your job")
@@ -322,7 +322,7 @@ fun RegisterProfileContent(
             onValueChange = onAboutQueryChanged,
             modifier = Modifier.fillMaxWidth(),
             placeholder = {
-                Text(text = "Tell us us more about yourself")
+                Text(text = "Tell us more about yourself")
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
